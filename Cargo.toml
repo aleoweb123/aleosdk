@@ -27,25 +27,32 @@ default-features = false
 
 [workspace.dependencies.snarkvm]
 git = "https://github.com/aleoweb123/snarkVM.git"
+branch = "my_webassembly"
 
 [workspace.dependencies.snarkvm-console]
 git = "https://github.com/aleoweb123/snarkVM.git"
+branch = "my_webassembly"
 
 [workspace.dependencies.snarkvm-circuit-network]
 git = "https://github.com/aleoweb123/snarkVM.git"
+branch = "my_webassembly"
 
 [workspace.dependencies.snarkvm-console-network]
 git = "https://github.com/aleoweb123/snarkVM.git"
+branch = "my_webassembly"
 
 [workspace.dependencies.snarkvm-synthesizer]
 git = "https://github.com/aleoweb123/snarkVM.git"
+branch = "my_webassembly"
 
 [workspace.dependencies.snarkvm-wasm]
 git = "https://github.com/aleoweb123/snarkVM.git"
+branch = "my_webassembly"
 default-features = false
 
 [workspace.dependencies.snarkvm-parameters]
 git = "https://github.com/aleoweb123/snarkVM.git"
+branch = "my_webassembly"
 default-features = false
 # features = [ "wasm" ]
 
