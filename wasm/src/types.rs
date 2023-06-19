@@ -26,10 +26,19 @@ pub use aleo_rust::{
     Signature,
     Testnet3,
     ViewKey,
+    Field,
+    Value,
 };
 use snarkvm_circuit_network::AleoV0;
-use snarkvm_synthesizer::{Fee, Process, Program, Transaction};
-pub use snarkvm_wasm::{network::Environment, program::Response, FromBytes, PrimeField, ToBytes};
+use snarkvm_synthesizer::{helpers::memory::BlockMemory, Fee, Process, Program, Transaction};
+use snarkvm_wasm::program::{ProgramOwner, TransactionLeaf};
+pub use snarkvm_wasm::{
+    network::Environment,
+    program::{Response, TRANSACTION_DEPTH},
+    FromBytes,
+    PrimeField,
+    ToBytes,
+};
 
 // Account types
 pub type AddressNative = Address<CurrentNetwork>;
@@ -48,10 +57,15 @@ pub type RecordCiphertextNative = Record<CurrentNetwork, CiphertextNative>;
 pub type RecordPlaintextNative = Record<CurrentNetwork, PlaintextNative>;
 
 // Program types
+pub type CurrentBlockMemory = BlockMemory<CurrentNetwork>;
 pub type FeeNative = Fee<CurrentNetwork>;
 pub type IdentifierNative = Identifier<CurrentNetwork>;
 pub type ProcessNative = Process<CurrentNetwork>;
 pub type ProgramNative = Program<CurrentNetwork>;
 pub type ProgramIDNative = ProgramID<CurrentNetwork>;
+pub type ProgramOwnerNative = ProgramOwner<CurrentNetwork>;
 pub type ResponseNative = Response<CurrentNetwork>;
+pub type TransactionLeafNative = TransactionLeaf<CurrentNetwork>;
 pub type TransactionNative = Transaction<CurrentNetwork>;
+pub type FieldNative = Field<CurrentNetwork>;
+pub type ValueNative = Value<CurrentNetwork>;

@@ -14,20 +14,42 @@
 // You should have received a copy of the GNU General Public License
 // along with the Aleo library. If not, see <https://www.gnu.org/licenses/>.
 
+pub mod deploy;
+pub use deploy::*;
+
 pub mod execute;
 pub use execute::*;
 
+pub mod join;
+pub use join::*;
+
+pub mod split;
+pub use split::*;
+
+pub mod transfer;
+pub use transfer::*;
+
+pub mod utils;
+
+use crate::types::CurrentNetwork;
+
+use snarkvm_synthesizer::snark::{ProvingKey, VerifyingKey};
+
+use indexmap::IndexMap;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]
 #[derive(Clone)]
-pub struct ProgramManager;
+pub struct ProgramManager {
+    proving_key_cache: IndexMap<String, ProvingKey<CurrentNetwork>>,
+    verifying_key_cache: IndexMap<String, VerifyingKey<CurrentNetwork>>,
+}
 
 #[wasm_bindgen]
 impl ProgramManager {
     #[wasm_bindgen]
     pub fn new() -> Self {
-        Self
+        Self { proving_key_cache: IndexMap::new(), verifying_key_cache: IndexMap::new() }
     }
 }
 
