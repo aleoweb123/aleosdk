@@ -163,7 +163,7 @@ impl ProgramManager {
         log("transfer trace prove_execution");
         // Prove the execution and fee
         let execution = trace
-            .prove_execution::<CurrentAleo, _>("credits.aleo/transfer_private", &mut StdRng::from_entropy())
+            .prove_execution::<CurrentAleo, _>("credits.aleo/fee", &mut StdRng::from_entropy())
             .map_err(|e| e.to_string())?;
 
         log("transfer trace prove_fee");
@@ -182,92 +182,92 @@ impl ProgramManager {
         Ok(Transaction::from(transaction))
     }
 
-    #[wasm_bindgen(js_name = "newtransfer")]
-    #[allow(clippy::too_many_arguments)]
-    pub async fn new_transfer(
-        &mut self,
-        private_key: PrivateKey,
-        amount_credits: f64,
-        recipient: String,
-        transfer_type: String,
-        amount_record: Option<RecordPlaintext>,
-        fee_credits: f64,
-        fee_record: RecordPlaintext,
-        url: String,
-        cache: bool,
-        transfer_proving_key: Option<ProvingKey>,
-        transfer_verifying_key: Option<VerifyingKey>,
-        fee_proving_key: Option<ProvingKey>,
-        fee_verifying_key: Option<VerifyingKey>,
-    ) -> Result<Transaction, String> {
-        log("newtransfer execution");
-        let execution = {
-            // Initialize an RNG.
-            let rng = &mut rand::thread_rng();
+    // #[wasm_bindgen(js_name = "newtransfer")]
+    // #[allow(clippy::too_many_arguments)]
+    // pub async fn new_transfer(
+    //     &mut self,
+    //     private_key: PrivateKey,
+    //     amount_credits: f64,
+    //     recipient: String,
+    //     transfer_type: String,
+    //     amount_record: Option<RecordPlaintext>,
+    //     fee_credits: f64,
+    //     fee_record: RecordPlaintext,
+    //     url: String,
+    //     cache: bool,
+    //     transfer_proving_key: Option<ProvingKey>,
+    //     transfer_verifying_key: Option<VerifyingKey>,
+    //     fee_proving_key: Option<ProvingKey>,
+    //     fee_verifying_key: Option<VerifyingKey>,
+    // ) -> Result<Transaction, String> {
+    //     log("newtransfer execution");
+    //     let execution = {
+    //         // Initialize an RNG.
+    //         let rng = &mut rand::thread_rng();
 
-            // Initialize the VM.
-            log("newtransfer Initialize the VM");
-            let store = ConsensusStoreNative::open(None).map_err(|e| e.to_string())?;
-            let vm = VMNative::from(store).map_err(|e| e.to_string())?;
+    //         // Initialize the VM.
+    //         log("newtransfer Initialize the VM");
+    //         let store = ConsensusStoreNative::open(None).map_err(|e| e.to_string())?;
+    //         let vm = VMNative::from(store).map_err(|e| e.to_string())?;
 
-            let amount_microcredits = (amount_credits * 1_000_000.0) as u64;
-            let amount_record = RecordPlaintextNative::from_str(&amount_record.unwrap().to_string()).map_err(|e| e.to_string())?;
-            let fee = (fee_credits * 1_000_000.0) as u64;
-            let fee = (RecordPlaintextNative::from_str(&fee_record.to_string()).map_err(|e| e.to_string())?, fee);
+    //         let amount_microcredits = (amount_credits * 1_000_000.0) as u64;
+    //         let amount_record = RecordPlaintextNative::from_str(&amount_record.unwrap().to_string()).map_err(|e| e.to_string())?;
+    //         let fee = (fee_credits * 1_000_000.0) as u64;
+    //         let fee = (RecordPlaintextNative::from_str(&fee_record.to_string()).map_err(|e| e.to_string())?, fee);
 
-            let transfer_type = match transfer_type.as_str() {
-                "private" => "transfer_".to_string().add("private"),
-                "private_to_public" => "transfer_".to_string().add("private_to_public"),
-                "public" => "transfer_".to_string().add("public"),
-                "public_to_private" => "transfer_".to_string().add("public_to_private"),
-                _ => transfer_type,
-            };
-            log(&format!("transfer transfer_type {}", transfer_type));
-            // Prepare the inputs for a transfer.
+    //         let transfer_type = match transfer_type.as_str() {
+    //             "private" => "transfer_".to_string().add("private"),
+    //             "private_to_public" => "transfer_".to_string().add("private_to_public"),
+    //             "public" => "transfer_".to_string().add("public"),
+    //             "public_to_private" => "transfer_".to_string().add("public_to_private"),
+    //             _ => transfer_type,
+    //         };
+    //         log(&format!("transfer transfer_type {}", transfer_type));
+    //         // Prepare the inputs for a transfer.
             
-            // let inputs = Array::new_with_length(3);
+    //         // let inputs = Array::new_with_length(3);
             
-            // let transfer_type = match transfer_type.as_str() {
-            //     "transfer_private" => {
-            //         if amount_record.is_none() {
-            //             return Err("Amount record must be provided for private transfers".to_string());
-            //         }
-            //         inputs.set(0u32, wasm_bindgen::JsValue::from_str(&amount_record.unwrap().to_string()));
-            //         inputs.set(1u32, wasm_bindgen::JsValue::from_str(&recipient));
-            //         inputs.set(2u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
-            //         transfer_type
-            //     }
-            //     "transfer_private_to_public" => {
-            //         if amount_record.is_none() {
-            //             return Err("Amount record must be provided for private transfers".to_string());
-            //         }
-            //         inputs.set(0u32, wasm_bindgen::JsValue::from_str(&amount_record.unwrap().to_string()));
-            //         inputs.set(1u32, wasm_bindgen::JsValue::from_str(&recipient));
-            //         inputs.set(2u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
-            //         transfer_type
-            //     }
-            //     "transfer_public" => {
-            //         inputs.set(0u32, wasm_bindgen::JsValue::from_str(&recipient));
-            //         inputs.set(1u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
-            //         transfer_type
-            //     }
-            //     "transfer_public_to_private" => {
-            //         inputs.set(1u32, wasm_bindgen::JsValue::from_str(&recipient));
-            //         inputs.set(2u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
-            //         transfer_type
-            //     }
-            //     _ => return Err("Invalid transfer type".to_string()),
-            // };
+    //         // let transfer_type = match transfer_type.as_str() {
+    //         //     "transfer_private" => {
+    //         //         if amount_record.is_none() {
+    //         //             return Err("Amount record must be provided for private transfers".to_string());
+    //         //         }
+    //         //         inputs.set(0u32, wasm_bindgen::JsValue::from_str(&amount_record.unwrap().to_string()));
+    //         //         inputs.set(1u32, wasm_bindgen::JsValue::from_str(&recipient));
+    //         //         inputs.set(2u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
+    //         //         transfer_type
+    //         //     }
+    //         //     "transfer_private_to_public" => {
+    //         //         if amount_record.is_none() {
+    //         //             return Err("Amount record must be provided for private transfers".to_string());
+    //         //         }
+    //         //         inputs.set(0u32, wasm_bindgen::JsValue::from_str(&amount_record.unwrap().to_string()));
+    //         //         inputs.set(1u32, wasm_bindgen::JsValue::from_str(&recipient));
+    //         //         inputs.set(2u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
+    //         //         transfer_type
+    //         //     }
+    //         //     "transfer_public" => {
+    //         //         inputs.set(0u32, wasm_bindgen::JsValue::from_str(&recipient));
+    //         //         inputs.set(1u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
+    //         //         transfer_type
+    //         //     }
+    //         //     "transfer_public_to_private" => {
+    //         //         inputs.set(1u32, wasm_bindgen::JsValue::from_str(&recipient));
+    //         //         inputs.set(2u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
+    //         //         transfer_type
+    //         //     }
+    //         //     _ => return Err("Invalid transfer type".to_string()),
+    //         // };
 
-            let inputs = vec![
-                ValueNative::Record(amount_record),
-                ValueNative::from_str(&format!("{}", recipient)).map_err(|e| e.to_string())?,
-                ValueNative::from_str(&format!("{}u64", amount_microcredits)).map_err(|e| e.to_string())?,
-            ];
-            log("newtransfer Create a new transaction.");
-            // Create a new transaction.
-            vm.execute(&private_key, ("credits.aleo", "transfer_private"), inputs.iter(), Some(fee), None, rng).map_err(|e| e.to_string())?
-        };
-        Ok(Transaction::from(execution))
-    }
+    //         let inputs = vec![
+    //             ValueNative::Record(amount_record),
+    //             ValueNative::from_str(&format!("{}", recipient)).map_err(|e| e.to_string())?,
+    //             ValueNative::from_str(&format!("{}u64", amount_microcredits)).map_err(|e| e.to_string())?,
+    //         ];
+    //         log("newtransfer Create a new transaction.");
+    //         // Create a new transaction.
+    //         vm.execute(&private_key, ("credits.aleo", "transfer_private"), inputs.iter(), Some(fee), None, rng).map_err(|e| e.to_string())?
+    //     };
+    //     Ok(Transaction::from(execution))
+    // }
 }
