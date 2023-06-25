@@ -90,7 +90,7 @@ impl ProgramManager {
             "public_to_private" => "transfer_".to_string().add("public_to_private"),
             _ => transfer_type,
         };
-        log("transfer_type {}", transfer_type);
+        log("transfer_type");
 
         let transfer_type = match transfer_type.as_str() {
             "transfer_private" => {
