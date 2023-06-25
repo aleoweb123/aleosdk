@@ -78,7 +78,7 @@ impl ProgramManager {
         } else {
             (amount_credits * 1_000_000.0) as u64
         };
-        Self::validate_amount(fee_credits, &fee_record, true)?;
+        let fee_microcredits = Self::validate_amount(fee_credits, &fee_record, true)?;
 
         log("Setup the program and inputs");
         let program = ProgramNative::credits().unwrap().to_string();
@@ -160,17 +160,32 @@ impl ProgramManager {
         // Prepare the inclusion proofs for the fee & execution
         trace.prepare_async::<CurrentBlockMemory, _>(&url).await.map_err(|err| err.to_string())?;
 
-        let locator = program.add("/").add(&transfer_type);
-        log(&format!("transfer trace prove_execution locator {locator}"));
+        // let locator = program.add("/").add(&transfer_type);
+        // log(&format!("transfer trace prove_execution locator {locator}"));
         // Prove the execution and fee
         let execution = trace
-            .prove_execution::<CurrentAleo, _>(&locator, &mut StdRng::from_entropy())
+            .prove_execution::<CurrentAleo, _>("credits.aleo/fee", &mut StdRng::from_entropy())
             .map_err(|e| e.to_string())?;
 
         log("transfer trace prove_fee");
-        let fee = trace.prove_fee::<CurrentAleo, _>(&mut StdRng::from_entropy()).map_err(|e| e.to_string())?;
+
+        log("Executing fee program");
         log("transfer execution to_execution_id");
         let execution_id = execution.to_execution_id().map_err(|e| e.to_string())?;
+        
+        let fee_record_native = RecordPlaintextNative::from_str(&fee_record.to_string()).unwrap();
+        let (_, _, trace) = process
+            .execute_fee::<CurrentAleo, _>(
+                &private_key,
+                fee_record_native,
+                fee_microcredits,
+                execution_id,
+                &mut StdRng::from_entropy(),
+            )
+            .map_err(|err| err.to_string())?;
+
+        let fee = trace.prove_fee::<CurrentAleo, _>(&mut StdRng::from_entropy()).map_err(|e| e.to_string())?;
+        
 
         // Verify the execution and fee
         log("transfer process verify_execution");
