@@ -82,7 +82,7 @@ impl ProgramManager {
         log("Setup the program and inputs");
         let program = ProgramNative::credits().unwrap().to_string();
         let inputs = Array::new_with_length(3);
-        log(format!("transfer program {}, transfer_type {}", program, transfer_type));
+        log(&format!("transfer program {}, transfer_type {}", program, transfer_type));
 
         let transfer_type = match transfer_type.as_str() {
             "private" => "transfer_".to_string().add("private"),
@@ -91,7 +91,7 @@ impl ProgramManager {
             "public_to_private" => "transfer_".to_string().add("public_to_private"),
             _ => transfer_type,
         };
-        log(format!("transfer transfer_type {}", transfer_type));
+        log(&format!("transfer transfer_type {}", transfer_type));
 
         let transfer_type = match transfer_type.as_str() {
             "transfer_private" => {
