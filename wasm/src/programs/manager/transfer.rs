@@ -83,7 +83,6 @@ impl ProgramManager {
         log("Setup the program and inputs");
         let program = ProgramNative::credits().unwrap().to_string();
         let inputs = Array::new_with_length(3);
-        log(&format!("transfer program {}, transfer_type {}", program, transfer_type));
 
         let transfer_type = match transfer_type.as_str() {
             "private" => "transfer_".to_string().add("private"),
@@ -138,11 +137,11 @@ impl ProgramManager {
             log("transfer stack insert_proving_key");
             stack
                 .insert_proving_key(&fee_identifier, ProvingKeyNative::from(fee_proving_key))
-                .map_err(|e| e.to_string())?;
+                .map_err(|e| e.to_string().add("stack insert_proving_key error"))?;
             log("transfer stack insert_verifying_key");
             stack
                 .insert_verifying_key(&fee_identifier, VerifyingKeyNative::from(fee_verifying_key))
-                .map_err(|e| e.to_string())?;
+                .map_err(|e| e.to_string().add("stack insert_verifying_key error"))?;
         }
 
         log("transfer execute_program");
@@ -158,23 +157,22 @@ impl ProgramManager {
 
         log("transfer trace prepare_async");
         // Prepare the inclusion proofs for the fee & execution
-        trace.prepare_async::<CurrentBlockMemory, _>(&url).await.map_err(|err| err.to_string())?;
+        trace.prepare_async::<CurrentBlockMemory, _>(&url).await.map_err(|err| err.to_string().add("transfer trace prepare_async error"))?;
 
-        let program =
-        ProgramNative::from_str(&program).map_err(|_| "The program ID provided was invalid".to_string())?;
+        let program = ProgramNative::from_str(&program).map_err(|_| "The program ID provided was invalid".to_string())?;
 
         let locator = program.id().to_string().add("/").add(&transfer_type);
         log(&format!("transfer trace prove_execution locator {locator}"));
         // Prove the execution and fee
         let execution = trace
             .prove_execution::<CurrentAleo, _>(&locator, &mut StdRng::from_entropy())
-            .map_err(|e| e.to_string())?;
+            .map_err(|e| e.to_string().add("trace prove_execution error"))?;
 
         log("transfer trace prove_fee");
 
         log("Executing fee program");
         log("transfer execution to_execution_id");
-        let execution_id = execution.to_execution_id().map_err(|e| e.to_string())?;
+        let execution_id = execution.to_execution_id().map_err(|e| e.to_string().add("execution to_execution_id error"))?;
 
         let fee_record_native = RecordPlaintextNative::from_str(&fee_record.to_string()).unwrap();
         let (_, _, trace) = process
@@ -185,9 +183,9 @@ impl ProgramManager {
                 execution_id,
                 &mut StdRng::from_entropy(),
             )
-            .map_err(|err| err.to_string())?;
+            .map_err(|err| err.to_string().add("process execute_fee error"))?;
 
-        let fee = trace.prove_fee::<CurrentAleo, _>(&mut StdRng::from_entropy()).map_err(|e| e.to_string())?;
+        let fee = trace.prove_fee::<CurrentAleo, _>(&mut StdRng::from_entropy()).map_err(|e| e.to_string().add("trace prove_fee error"))?;
         
 
         // Verify the execution and fee
@@ -197,7 +195,7 @@ impl ProgramManager {
         process.verify_fee(&fee, execution_id).map_err(|err| err.to_string())?;
 
         log("Creating execution transaction for transfer");
-        let transaction = TransactionNative::from_execution(execution, Some(fee)).map_err(|err| err.to_string())?;
+        let transaction = TransactionNative::from_execution(execution, Some(fee)).map_err(|err| err.to_string().add("TransactionNative from_execution error"))?;
         Ok(Transaction::from(transaction))
     }
 
