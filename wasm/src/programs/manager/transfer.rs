@@ -162,7 +162,7 @@ impl ProgramManager {
         log("transfer trace prove_execution");
         // Prove the execution and fee
         let execution = trace
-            .prove_execution::<CurrentAleo, _>("credits.aleo/transfer", &mut StdRng::from_entropy())
+            .prove_execution::<CurrentAleo, _>("credits.aleo/transfer_private", &mut StdRng::from_entropy())
             .map_err(|e| e.to_string())?;
 
         log("transfer trace prove_fee");
