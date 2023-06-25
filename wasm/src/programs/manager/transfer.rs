@@ -160,7 +160,10 @@ impl ProgramManager {
         // Prepare the inclusion proofs for the fee & execution
         trace.prepare_async::<CurrentBlockMemory, _>(&url).await.map_err(|err| err.to_string())?;
 
-        let locator = program.add("/").add(&transfer_type);
+        let program =
+        ProgramNative::from_str(&program).map_err(|_| "The program ID provided was invalid".to_string())?;
+
+        let locator = program.id().to_string().add("/").add(&transfer_type);
         log(&format!("transfer trace prove_execution locator {locator}"));
         // Prove the execution and fee
         let execution = trace
