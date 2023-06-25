@@ -90,6 +90,7 @@ impl ProgramManager {
             "public_to_private" => "transfer_".to_string().add("public_to_private"),
             _ => transfer_type,
         };
+        log("transfer_type {}", transfer_type);
 
         let transfer_type = match transfer_type.as_str() {
             "transfer_private" => {
@@ -125,19 +126,24 @@ impl ProgramManager {
 
         let mut new_process;
         let process = get_process!(self, cache, new_process);
+        log("transfer fee_identifier");
         let fee_identifier = IdentifierNative::from_str("fee").map_err(|e| e.to_string())?;
+        log("transfer process get_stack");
         let stack = process.get_stack("credits.aleo").map_err(|e| e.to_string())?;
         if !stack.contains_proving_key(&fee_identifier) && fee_proving_key.is_some() && fee_verifying_key.is_some() {
             let fee_proving_key = fee_proving_key.unwrap();
             let fee_verifying_key = fee_verifying_key.unwrap();
+            log("transfer stack insert_proving_key");
             stack
                 .insert_proving_key(&fee_identifier, ProvingKeyNative::from(fee_proving_key))
                 .map_err(|e| e.to_string())?;
+            log("transfer stack insert_verifying_key");
             stack
                 .insert_verifying_key(&fee_identifier, VerifyingKeyNative::from(fee_verifying_key))
                 .map_err(|e| e.to_string())?;
         }
 
+        log("transfer execute_program");
         let (_, mut trace) = execute_program!(
             process,
             inputs,
@@ -148,18 +154,25 @@ impl ProgramManager {
             transfer_verifying_key
         );
 
+        log("transfer trace prepare_async");
         // Prepare the inclusion proofs for the fee & execution
         trace.prepare_async::<CurrentBlockMemory, _>(&url).await.map_err(|err| err.to_string())?;
 
+        log("transfer trace prove_execution");
         // Prove the execution and fee
         let execution = trace
             .prove_execution::<CurrentAleo, _>("credits.aleo/transfer", &mut StdRng::from_entropy())
             .map_err(|e| e.to_string())?;
+
+        log("transfer trace prove_fee");
         let fee = trace.prove_fee::<CurrentAleo, _>(&mut StdRng::from_entropy()).map_err(|e| e.to_string())?;
+        log("transfer execution to_execution_id");
         let execution_id = execution.to_execution_id().map_err(|e| e.to_string())?;
 
         // Verify the execution and fee
+        log("transfer process verify_execution");
         process.verify_execution(&execution).map_err(|err| err.to_string())?;
+        log("transfer process verify_fee");
         process.verify_fee(&fee, execution_id).map_err(|err| err.to_string())?;
 
         log("Creating execution transaction for transfer");
