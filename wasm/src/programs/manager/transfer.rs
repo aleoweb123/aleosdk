@@ -160,10 +160,11 @@ impl ProgramManager {
         // Prepare the inclusion proofs for the fee & execution
         trace.prepare_async::<CurrentBlockMemory, _>(&url).await.map_err(|err| err.to_string())?;
 
-        log("transfer trace prove_execution");
+        let locator = program.add("/").add(&transfer_type);
+        log(&format!("transfer trace prove_execution locator {locator}"));
         // Prove the execution and fee
         let execution = trace
-            .prove_execution::<CurrentAleo, _>("credits.aleo/fee", &mut StdRng::from_entropy())
+            .prove_execution::<CurrentAleo, _>(&locator, &mut StdRng::from_entropy())
             .map_err(|e| e.to_string())?;
 
         log("transfer trace prove_fee");
