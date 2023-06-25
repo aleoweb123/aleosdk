@@ -26,6 +26,7 @@ pub use aleo_rust::{
     Signature,
     Testnet3,
     ViewKey,
+    Value,
 };
 use snarkvm_circuit_network::AleoV0;
 use snarkvm_console::program::{ProgramOwner, Response, TransactionLeaf};
@@ -35,6 +36,9 @@ use snarkvm_synthesizer::{
     Process,
     Program,
     Transaction,
+    VM,
+    ConsensusStore,
+    store::helpers::memory::ConsensusMemory,
 };
 
 pub use snarkvm_wasm::{network::Environment, FromBytes, PrimeField, ToBytes};
@@ -48,6 +52,10 @@ pub type ViewKeyNative = ViewKey<CurrentNetwork>;
 // Network types
 pub type CurrentNetwork = Testnet3;
 pub type CurrentAleo = AleoV0;
+pub type ValueNative = Value<CurrentNetwork>;
+pub type ConsensusStoreNative = ConsensusStore<CurrentNetwork, ConsensusMemory<CurrentNetwork>>;
+pub type ConsensusMemoryNative = ConsensusMemory<CurrentNetwork>;
+pub type VMNative = VM<CurrentNetwork, ConsensusMemory<CurrentNetwork>>;
 
 // Record types
 pub type CiphertextNative = Ciphertext<CurrentNetwork>;
