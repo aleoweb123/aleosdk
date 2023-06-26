@@ -21,7 +21,7 @@ use crate::{
     execute_program,
     get_process,
     log,
-    types::{CurrentAleo, CurrentBlockMemory, IdentifierNative, ProcessNative, ProgramNative, TransactionNative},
+    types::{CurrentAleo, CurrentBlockMemory, IdentifierNative, ProcessNative, ProgramNative, TransactionNative, RecordPlaintextNative},
     ExecutionResponse,
     PrivateKey,
     RecordPlaintext,
@@ -116,7 +116,7 @@ impl ProgramManager {
         fee_verifying_key: Option<VerifyingKey>,
     ) -> Result<Transaction, String> {
         log(&format!("Executing function: {function} on-chain"));
-        Self::validate_amount(fee_credits, &fee_record, true)?;
+        let fee = Self::validate_amount(fee_credits, &fee_record, true)?;
 
         let mut new_process;
         let process = get_process!(self, cache, new_process);
@@ -145,8 +145,13 @@ impl ProgramManager {
         let execution = trace
             .prove_execution::<CurrentAleo, _>(&locator, &mut StdRng::from_entropy())
             .map_err(|e| e.to_string())?;
-        let fee = trace.prove_fee::<CurrentAleo, _>(&mut StdRng::from_entropy()).map_err(|e| e.to_string())?;
+
         let execution_id = execution.to_execution_id().map_err(|e| e.to_string())?;
+        let fee_record_native = RecordPlaintextNative::from_str(&fee_record.to_string()).unwrap();
+        let (_, _, mut trace) = process.execute_fee::<CurrentAleo, _>(&private_key, fee_record_native, fee, execution_id, &mut rand::thread_rng()).map_err(|e| e.to_string().add("process execute_fee error"))?;
+        trace.prepare_async::<CurrentBlockMemory, _>(&url).await.map_err(|err| err.to_string())?;;
+
+        let fee = trace.prove_fee::<CurrentAleo, _>(&mut StdRng::from_entropy()).map_err(|e| e.to_string())?;
 
         // Verify the execution and fee
         process.verify_execution(&execution).map_err(|err| err.to_string())?;

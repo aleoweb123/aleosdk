@@ -173,9 +173,10 @@ impl ProgramManager {
         log("Executing fee program");
         log("transfer execution to_execution_id");
         let execution_id = execution.to_execution_id().map_err(|e| e.to_string().add("execution to_execution_id error"))?;
-
+        log("transfer fee_record_native from_str");
         let fee_record_native = RecordPlaintextNative::from_str(&fee_record.to_string()).unwrap();
-        let (_, _, trace) = process
+        log("transfer process execute_fee");
+        let (_, _, mut trace) = process
             .execute_fee::<CurrentAleo, _>(
                 &private_key,
                 fee_record_native,
@@ -184,7 +185,11 @@ impl ProgramManager {
                 &mut StdRng::from_entropy(),
             )
             .map_err(|err| err.to_string().add("process execute_fee error"))?;
+        log("transfer trace prepare_async");
+        
+        trace.prepare_async::<CurrentBlockMemory, _>(&url).await.map_err(|err| err.to_string().add("transfer trace prepare_async error"))?;
 
+        log("transfer trace prove_fee");
         let fee = trace.prove_fee::<CurrentAleo, _>(&mut StdRng::from_entropy()).map_err(|e| e.to_string().add("trace prove_fee error"))?;
         
 
