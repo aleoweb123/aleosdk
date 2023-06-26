@@ -149,7 +149,7 @@ impl ProgramManager {
         let execution_id = execution.to_execution_id().map_err(|e| e.to_string())?;
         let fee_record_native = RecordPlaintextNative::from_str(&fee_record.to_string()).unwrap();
         let (_, _, mut trace) = process.execute_fee::<CurrentAleo, _>(&private_key, fee_record_native, fee, execution_id, &mut rand::thread_rng()).map_err(|e| e.to_string().add("process execute_fee error"))?;
-        trace.prepare_async::<CurrentBlockMemory, _>(&url).await.map_err(|err| err.to_string())?;;
+        trace.prepare_async::<CurrentBlockMemory, _>(&url).await.map_err(|err| err.to_string())?;
 
         let fee = trace.prove_fee::<CurrentAleo, _>(&mut StdRng::from_entropy()).map_err(|e| e.to_string())?;
 
