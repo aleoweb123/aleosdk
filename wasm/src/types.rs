@@ -33,6 +33,7 @@ use snarkvm_console::program::{ProgramOwner, Response, TransactionLeaf};
 use snarkvm_synthesizer::{
     helpers::memory::BlockMemory,
     snark::{ProvingKey, VerifyingKey},
+    Deployment,
     Process,
     Program,
     Transaction,
@@ -65,10 +66,11 @@ pub type RecordPlaintextNative = Record<CurrentNetwork, PlaintextNative>;
 
 // Program types
 pub type CurrentBlockMemory = BlockMemory<CurrentNetwork>;
+pub type DeploymentNative = Deployment<CurrentNetwork>;
 pub type IdentifierNative = Identifier<CurrentNetwork>;
 pub type ProcessNative = Process<CurrentNetwork>;
-pub type ProgramNative = Program<CurrentNetwork>;
 pub type ProgramIDNative = ProgramID<CurrentNetwork>;
+pub type ProgramNative = Program<CurrentNetwork>;
 pub type ProgramOwnerNative = ProgramOwner<CurrentNetwork>;
 pub type ProvingKeyNative = ProvingKey<CurrentNetwork>;
 pub type ResponseNative = Response<CurrentNetwork>;

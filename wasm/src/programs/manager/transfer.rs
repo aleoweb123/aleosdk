@@ -17,17 +17,25 @@
 use super::*;
 
 use crate::{
+    execute_fee,
     execute_program,
     get_process,
     log,
-    types::{CurrentAleo, CurrentNetwork, CurrentBlockMemory, IdentifierNative, ProcessNative, ProgramNative, TransactionNative, ConsensusStoreNative, ValueNative, ConsensusMemoryNative, RecordPlaintextNative, VMNative},
+    types::{
+        CurrentAleo,
+        CurrentBlockMemory,
+        IdentifierNative,
+        ProcessNative,
+        ProgramNative,
+        RecordPlaintextNative,
+        TransactionNative,
+    },
     PrivateKey,
     RecordPlaintext,
     Transaction,
 };
 
 use js_sys::Array;
-use lazy_static::__Deref;
 use rand::{rngs::StdRng, SeedableRng};
 use std::{ops::Add, str::FromStr};
 
@@ -84,67 +92,58 @@ impl ProgramManager {
         let program = ProgramNative::credits().unwrap().to_string();
         let inputs = Array::new_with_length(3);
 
-        let transfer_type = match transfer_type.as_str() {
-            "private" => "transfer_".to_string().add("private"),
-            "private_to_public" => "transfer_".to_string().add("private_to_public"),
-            "public" => "transfer_".to_string().add("public"),
-            "public_to_private" => "transfer_".to_string().add("public_to_private"),
-            _ => transfer_type,
-        };
-        log(&format!("transfer transfer_type {}", transfer_type));
+        let transfer_type = transfer_type.as_str();
+        log("Transfer Type is:");
+        log(transfer_type);
 
-        let transfer_type = match transfer_type.as_str() {
-            "transfer_private" => {
+        let transfer_type = match transfer_type {
+            "private" => {
                 if amount_record.is_none() {
                     return Err("Amount record must be provided for private transfers".to_string());
                 }
                 inputs.set(0u32, wasm_bindgen::JsValue::from_str(&amount_record.unwrap().to_string()));
                 inputs.set(1u32, wasm_bindgen::JsValue::from_str(&recipient));
                 inputs.set(2u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
-                transfer_type
+                "transfer_private"
             }
-            "transfer_private_to_public" => {
+            "private_to_public" => {
                 if amount_record.is_none() {
                     return Err("Amount record must be provided for private transfers".to_string());
                 }
                 inputs.set(0u32, wasm_bindgen::JsValue::from_str(&amount_record.unwrap().to_string()));
                 inputs.set(1u32, wasm_bindgen::JsValue::from_str(&recipient));
                 inputs.set(2u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
-                transfer_type
+                "transfer_private_to_public"
             }
-            "transfer_public" => {
+            "public" => {
                 inputs.set(0u32, wasm_bindgen::JsValue::from_str(&recipient));
                 inputs.set(1u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
-                transfer_type
+                "transfer_public"
             }
-            "transfer_public_to_private" => {
+            "public_to_private" => {
                 inputs.set(1u32, wasm_bindgen::JsValue::from_str(&recipient));
                 inputs.set(2u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
-                transfer_type
+                "transfer_public_to_private"
             }
             _ => return Err("Invalid transfer type".to_string()),
         };
 
         let mut new_process;
         let process = get_process!(self, cache, new_process);
-        log("transfer fee_identifier");
         let fee_identifier = IdentifierNative::from_str("fee").map_err(|e| e.to_string())?;
-        log("transfer process get_stack");
         let stack = process.get_stack("credits.aleo").map_err(|e| e.to_string())?;
         if !stack.contains_proving_key(&fee_identifier) && fee_proving_key.is_some() && fee_verifying_key.is_some() {
-            let fee_proving_key = fee_proving_key.unwrap();
-            let fee_verifying_key = fee_verifying_key.unwrap();
-            log("transfer stack insert_proving_key");
+            let fee_proving_key = fee_proving_key.clone().unwrap();
+            let fee_verifying_key = fee_verifying_key.clone().unwrap();
             stack
                 .insert_proving_key(&fee_identifier, ProvingKeyNative::from(fee_proving_key))
-                .map_err(|e| e.to_string().add("stack insert_proving_key error"))?;
-            log("transfer stack insert_verifying_key");
+                .map_err(|e| e.to_string())?;
             stack
                 .insert_verifying_key(&fee_identifier, VerifyingKeyNative::from(fee_verifying_key))
-                .map_err(|e| e.to_string().add("stack insert_verifying_key error"))?;
+                .map_err(|e| e.to_string())?;
         }
 
-        log("transfer execute_program");
+        log("Executing transfer function");
         let (_, mut trace) = execute_program!(
             process,
             inputs,
@@ -155,9 +154,8 @@ impl ProgramManager {
             transfer_verifying_key
         );
 
-        log("transfer trace prepare_async");
-        // Prepare the inclusion proofs for the fee & execution
-        trace.prepare_async::<CurrentBlockMemory, _>(&url).await.map_err(|err| err.to_string().add("transfer trace prepare_async error"))?;
+        log("Preparing the inclusion proof for the transfer execution");
+        trace.prepare_async::<CurrentBlockMemory, _>(&url).await.map_err(|err| err.to_string())?;
 
         let program = ProgramNative::from_str(&program).map_err(|_| "The program ID provided was invalid".to_string())?;
 
@@ -166,130 +164,26 @@ impl ProgramManager {
         // Prove the execution and fee
         let execution = trace
             .prove_execution::<CurrentAleo, _>(&locator, &mut StdRng::from_entropy())
-            .map_err(|e| e.to_string().add("trace prove_execution error"))?;
+            .map_err(|e| e.to_string())?;
+        let execution_id = execution.to_execution_id().map_err(|e| e.to_string())?;
 
-        log("transfer trace prove_fee");
-
-        log("Executing fee program");
-        log("transfer execution to_execution_id");
-        let execution_id = execution.to_execution_id().map_err(|e| e.to_string().add("execution to_execution_id error"))?;
-        log("transfer fee_record_native from_str");
-        let fee_record_native = RecordPlaintextNative::from_str(&fee_record.to_string()).unwrap();
-        log("transfer process execute_fee");
-        let (_, _, mut trace) = process
-            .execute_fee::<CurrentAleo, _>(
-                &private_key,
-                fee_record_native,
-                fee_microcredits,
-                execution_id,
-                &mut StdRng::from_entropy(),
-            )
-            .map_err(|err| err.to_string().add("process execute_fee error"))?;
-        log("transfer trace prepare_async");
-        
-        trace.prepare_async::<CurrentBlockMemory, _>(&url).await.map_err(|err| err.to_string().add("transfer trace prepare_async error"))?;
-
-        log("transfer trace prove_fee");
-        let fee = trace.prove_fee::<CurrentAleo, _>(&mut StdRng::from_entropy()).map_err(|e| e.to_string().add("trace prove_fee error"))?;
-        
-
-        // Verify the execution and fee
-        log("transfer process verify_execution");
+        log("Verifying the transfer execution");
         process.verify_execution(&execution).map_err(|err| err.to_string())?;
-        log("transfer process verify_fee");
-        process.verify_fee(&fee, execution_id).map_err(|err| err.to_string())?;
+
+        log("Executing the fee");
+        let fee = execute_fee!(
+            process,
+            private_key,
+            fee_record,
+            fee_microcredits,
+            url,
+            fee_proving_key,
+            fee_verifying_key,
+            execution_id
+        );
 
         log("Creating execution transaction for transfer");
-        let transaction = TransactionNative::from_execution(execution, Some(fee)).map_err(|err| err.to_string().add("TransactionNative from_execution error"))?;
+        let transaction = TransactionNative::from_execution(execution, Some(fee)).map_err(|err| err.to_string())?;
         Ok(Transaction::from(transaction))
     }
-
-    // #[wasm_bindgen(js_name = "newtransfer")]
-    // #[allow(clippy::too_many_arguments)]
-    // pub async fn new_transfer(
-    //     &mut self,
-    //     private_key: PrivateKey,
-    //     amount_credits: f64,
-    //     recipient: String,
-    //     transfer_type: String,
-    //     amount_record: Option<RecordPlaintext>,
-    //     fee_credits: f64,
-    //     fee_record: RecordPlaintext,
-    //     url: String,
-    //     cache: bool,
-    //     transfer_proving_key: Option<ProvingKey>,
-    //     transfer_verifying_key: Option<VerifyingKey>,
-    //     fee_proving_key: Option<ProvingKey>,
-    //     fee_verifying_key: Option<VerifyingKey>,
-    // ) -> Result<Transaction, String> {
-    //     log("newtransfer execution");
-    //     let execution = {
-    //         // Initialize an RNG.
-    //         let rng = &mut rand::thread_rng();
-
-    //         // Initialize the VM.
-    //         log("newtransfer Initialize the VM");
-    //         let store = ConsensusStoreNative::open(None).map_err(|e| e.to_string())?;
-    //         let vm = VMNative::from(store).map_err(|e| e.to_string())?;
-
-    //         let amount_microcredits = (amount_credits * 1_000_000.0) as u64;
-    //         let amount_record = RecordPlaintextNative::from_str(&amount_record.unwrap().to_string()).map_err(|e| e.to_string())?;
-    //         let fee = (fee_credits * 1_000_000.0) as u64;
-    //         let fee = (RecordPlaintextNative::from_str(&fee_record.to_string()).map_err(|e| e.to_string())?, fee);
-
-    //         let transfer_type = match transfer_type.as_str() {
-    //             "private" => "transfer_".to_string().add("private"),
-    //             "private_to_public" => "transfer_".to_string().add("private_to_public"),
-    //             "public" => "transfer_".to_string().add("public"),
-    //             "public_to_private" => "transfer_".to_string().add("public_to_private"),
-    //             _ => transfer_type,
-    //         };
-    //         log(&format!("transfer transfer_type {}", transfer_type));
-    //         // Prepare the inputs for a transfer.
-            
-    //         // let inputs = Array::new_with_length(3);
-            
-    //         // let transfer_type = match transfer_type.as_str() {
-    //         //     "transfer_private" => {
-    //         //         if amount_record.is_none() {
-    //         //             return Err("Amount record must be provided for private transfers".to_string());
-    //         //         }
-    //         //         inputs.set(0u32, wasm_bindgen::JsValue::from_str(&amount_record.unwrap().to_string()));
-    //         //         inputs.set(1u32, wasm_bindgen::JsValue::from_str(&recipient));
-    //         //         inputs.set(2u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
-    //         //         transfer_type
-    //         //     }
-    //         //     "transfer_private_to_public" => {
-    //         //         if amount_record.is_none() {
-    //         //             return Err("Amount record must be provided for private transfers".to_string());
-    //         //         }
-    //         //         inputs.set(0u32, wasm_bindgen::JsValue::from_str(&amount_record.unwrap().to_string()));
-    //         //         inputs.set(1u32, wasm_bindgen::JsValue::from_str(&recipient));
-    //         //         inputs.set(2u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
-    //         //         transfer_type
-    //         //     }
-    //         //     "transfer_public" => {
-    //         //         inputs.set(0u32, wasm_bindgen::JsValue::from_str(&recipient));
-    //         //         inputs.set(1u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
-    //         //         transfer_type
-    //         //     }
-    //         //     "transfer_public_to_private" => {
-    //         //         inputs.set(1u32, wasm_bindgen::JsValue::from_str(&recipient));
-    //         //         inputs.set(2u32, wasm_bindgen::JsValue::from_str(&amount_microcredits.to_string().add("u64")));
-    //         //         transfer_type
-    //         //     }
-    //         //     _ => return Err("Invalid transfer type".to_string()),
-    //         // };
-
-    //         let inputs = vec![
-    //             ValueNative::Record(amount_record),
-    //             ValueNative::from_str(&format!("{}", recipient)).map_err(|e| e.to_string())?,
-    //             ValueNative::from_str(&format!("{}u64", amount_microcredits)).map_err(|e| e.to_string())?,
-    //         ];
-    //         log("newtransfer Create a new transaction.");
-    //         // Create a new transaction.
-    //         vm.execute(&private_key, ("credits.aleo", "transfer_private"), inputs.iter(), Some(fee), None, rng).map_err(|e| e.to_string())?
-    //     };
-    //     Ok(Transaction::from(execution))
-    // }
 }
