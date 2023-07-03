@@ -67,7 +67,7 @@ workspace = true
 version = "1.0"
 
 [workspace.dependencies.clap]
-version = "4.3.5"
+version = "4.3.10"
 features = [ "derive", "string" ]
 
 [dependencies.clap]
@@ -95,7 +95,7 @@ version = "7.2.0"
 
 [dependencies.self_update]
 version = "0.37"
-features = [ "default", "archive-zip", "archive-tar"]
+features = [ "archive-zip" ]
 
 [dependencies.serde]
 version = "1"
@@ -117,7 +117,7 @@ features = [
 version = "1.0"
 
 [dependencies.tokio]
-version = "1.28"
+version = "1.29"
 features = [ "rt" ]
 
 [dependencies.warp]

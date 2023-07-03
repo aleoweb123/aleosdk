@@ -49,7 +49,10 @@ export const Execute = () => {
     }
 
     function spawnWorker() {
-        let worker = new Worker("./worker.js");
+        let worker = new Worker(
+            new URL('../../workers/worker.js', import.meta.url),
+            {type: 'module'}
+        );
         worker.addEventListener("message", ev => {
             if (ev.data.type == 'OFFLINE_EXECUTION_COMPLETED') {
                 setLoading(false);
@@ -125,7 +128,9 @@ export const Execute = () => {
 
         let functionInputs = []
         try {
-            functionInputs = inputs.split(" ");
+            if (!!inputs) {
+                functionInputs = inputs.split(" ");
+            }
         } catch (e) {
             setExecutionError("Inputs are not valid");
             setLoading(false);

@@ -29,7 +29,7 @@ pub use aleo_rust::{
     Value,
 };
 use snarkvm_circuit_network::AleoV0;
-use snarkvm_console::program::{ProgramOwner, Response, TransactionLeaf};
+use snarkvm_console::program::{ProgramOwner, Response};
 use snarkvm_synthesizer::{
     helpers::memory::BlockMemory,
     snark::{ProvingKey, VerifyingKey},
@@ -74,6 +74,5 @@ pub type ProgramNative = Program<CurrentNetwork>;
 pub type ProgramOwnerNative = ProgramOwner<CurrentNetwork>;
 pub type ProvingKeyNative = ProvingKey<CurrentNetwork>;
 pub type ResponseNative = Response<CurrentNetwork>;
-pub type TransactionLeafNative = TransactionLeaf<CurrentNetwork>;
 pub type TransactionNative = Transaction<CurrentNetwork>;
 pub type VerifyingKeyNative = VerifyingKey<CurrentNetwork>;
