@@ -64,6 +64,12 @@ features = [ "wasm" ]
 [dependencies.snarkvm-circuit-network]
 workspace = true
 
+[dependencies.snarkvm-circuit-program]
+workspace = true
+
+[dependencies.snarkvm-circuit-environment]
+workspace = true
+
 [dependencies.snarkvm-synthesizer]
 workspace = true
 features = [ "wasm" ]

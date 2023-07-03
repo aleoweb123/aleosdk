@@ -168,10 +168,69 @@ use wasm_bindgen::prelude::*;
 #[cfg(feature = "parallel")]
 pub use wasm_bindgen_rayon::init_thread_pool;
 
+// use crate::types::{AValueNative, ALiteralNative, ProgramNative, ValueNative, LiteralNative,FieldlNative, LiteralTypeNative};
+
+use snarkvm_synthesizer::output_type;
+use snarkvm_console::prelude::ToField;
+use std::{ops::Deref, str::FromStr};
+use aleo_rust::{
+    Value,
+    Literal,
+    Field, Testnet3,
+};
+use snarkvm_console::program::LiteralType;
+use snarkvm_circuit_program::{Literal as ALiteral, Value as AValue};
+
+use snarkvm_circuit_network::Aleo;
+use snarkvm_circuit_network::AleoV0;
+use snarkvm_wasm::FromBytes;
+use snarkvm_circuit_environment::{Eject, Inject, Mode, ToBits as AToBits};
+use aleo_rust::ToBytes;
+
 // Facilities for cross-platform logging in both web browsers and nodeJS
 #[wasm_bindgen]
 extern "C" {
     // Log a &str the console in the browser or console.log in nodejs
     #[wasm_bindgen(js_namespace = console)]
     fn log(s: &str);
+}
+
+#[wasm_bindgen(js_name = "hashBHP")]
+pub fn hash_bhp(input: String, bhptype: &str, destination_type: &str) ->  Result<Vec<u8>, String> {
+    let value = Value::<Testnet3>::from_str(&input).map_err(|e| format!("invalid input: {e}"))?;
+    let avalue = AValue::<AleoV0>::new(Mode::Public, value.clone());
+    let destination_type = LiteralType::from_str(destination_type).map_err(|e| format!("invalid destination type: {e}"))?;
+    let output_type = match bhptype {
+        "bhp256" => ALiteral::Group(Aleo::hash_to_group_bhp256(&avalue.to_bits_le())),
+        "bhp512" => ALiteral::Group(Aleo::hash_to_group_bhp512(&avalue.to_bits_le())),
+        "bhp768" => ALiteral::Group(Aleo::hash_to_group_bhp768(&avalue.to_bits_le())),
+        "bhp1024" => ALiteral::Group(Aleo::hash_to_group_bhp1024(&avalue.to_bits_le())),
+        _ => return Err("Invalid bhptype type".to_string()),
+    };
+    let output = output_type
+        .downcast_lossy(destination_type)
+        .map_err(|e| format!("failed to downcast: {e}"))?;
+
+    literal_to_bytes(output.eject_value()).map_err(|e| format!("literal_to_bytes: {e}"))
+}
+
+fn literal_to_bytes(literal: Literal<Testnet3>) -> anyhow::Result<Vec<u8>> {
+    match literal {
+        Literal::Address(v) => v.to_bytes_le(),
+        Literal::Boolean(v) => v.to_bytes_le(),
+        Literal::Field(v) => v.to_bytes_le(),
+        Literal::Group(v) => v.to_bytes_le(),
+        Literal::I8(v) => v.to_bytes_le(),
+        Literal::I16(v) => v.to_bytes_le(),
+        Literal::I32(v) => v.to_bytes_le(),
+        Literal::I64(v) => v.to_bytes_le(),
+        Literal::I128(v) => v.to_bytes_le(),
+        Literal::U8(v) => v.to_bytes_le(),
+        Literal::U16(v) => v.to_bytes_le(),
+        Literal::U32(v) => v.to_bytes_le(),
+        Literal::U64(v) => v.to_bytes_le(),
+        Literal::U128(v) => v.to_bytes_le(),
+        Literal::Scalar(v) => v.to_bytes_le(),
+        Literal::String(v) => v.to_bytes_le(),
+    }
 }

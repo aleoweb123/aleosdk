@@ -33,6 +33,14 @@ git = "https://github.com/aleoweb123/snarkVM.git"
 git = "https://github.com/aleoweb123/snarkVM.git"
 # branch = "testnet3"
 
+[workspace.dependencies.snarkvm-circuit-program]
+git = "https://github.com/aleoweb123/snarkVM.git"
+# branch = "testnet3"
+
+[workspace.dependencies.snarkvm-circuit-environment]
+git = "https://github.com/aleoweb123/snarkVM.git"
+# branch = "testnet3"
+
 [workspace.dependencies.snarkvm-console]
 git = "https://github.com/aleoweb123/snarkVM.git"
 # branch = "testnet3"
