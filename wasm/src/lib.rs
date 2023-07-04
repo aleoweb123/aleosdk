@@ -198,7 +198,7 @@ pub fn Base58(input: &str, action: &str) -> Result<String, String> {
     match action {
         "encode" => {
             let bytes = bs58::encode(input.as_bytes().to_vec()).into_vec();
-            let encodecode = bs58::encode("PowerVotingToken".as_bytes().to_vec()).into_string();
+            let encodecode = bs58::encode(input.as_bytes().to_vec()).into_string();
 
             let big_int = BigUint::from_bytes_be(&bytes);
             let big_int_str = big_int.to_string();
