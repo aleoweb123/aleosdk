@@ -177,9 +177,11 @@ use aleo_rust::{
     Value,
     Literal,
     Field, Testnet3,
+
 };
 use snarkvm_console::program::LiteralType;
 use snarkvm_circuit_program::{Literal as ALiteral, Value as AValue};
+use snarkvm_console::prelude::TypeName;
 
 use snarkvm_circuit_network::Aleo;
 use snarkvm_circuit_network::AleoV0;
@@ -196,7 +198,7 @@ extern "C" {
 }
 
 #[wasm_bindgen(js_name = "hashBHP")]
-pub fn hash_bhp(input: String, bhptype: &str, destination_type: &str) ->  Result<Vec<u8>, String> {
+pub fn hash_bhp(input: String, bhptype: &str, destination_type: &str) ->  Result<String, String> {
     let value = Value::<Testnet3>::from_str(&input).map_err(|e| format!("invalid input: {e}"))?;
     let avalue = AValue::<AleoV0>::new(Mode::Public, value.clone());
     let destination_type = LiteralType::from_str(destination_type).map_err(|e| format!("invalid destination type: {e}"))?;
@@ -211,7 +213,10 @@ pub fn hash_bhp(input: String, bhptype: &str, destination_type: &str) ->  Result
         .downcast_lossy(destination_type)
         .map_err(|e| format!("failed to downcast: {e}"))?;
 
-    literal_to_bytes(output.eject_value()).map_err(|e| format!("literal_to_bytes: {e}"))
+    let fieldbytes = literal_to_bytes(output.eject_value()).map_err(|e| format!("literal_to_bytes: {e}"))?;
+
+    let field = Field::<Testnet3>::from_bytes_le(&fieldbytes).map_err(|e| format!("invalid fieldbytes: {e}"))?;
+    Ok(format!("{}{}", field, Field::<Testnet3>::type_name()))
 }
 
 fn literal_to_bytes(literal: Literal<Testnet3>) -> anyhow::Result<Vec<u8>> {
