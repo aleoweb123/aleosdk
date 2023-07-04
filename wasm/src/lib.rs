@@ -164,31 +164,26 @@ pub use record::*;
 pub(crate) mod types;
 
 use wasm_bindgen::prelude::*;
+use num_bigint::BigUint;
 
 #[cfg(feature = "parallel")]
 pub use wasm_bindgen_rayon::init_thread_pool;
 
 // use crate::types::{AValueNative, ALiteralNative, ProgramNative, ValueNative, LiteralNative,FieldlNative, LiteralTypeNative};
 
-use snarkvm_synthesizer::output_type;
-use snarkvm_console::prelude::ToField;
-use std::string;
-use std::{ops::Deref, str::FromStr};
-use aleo_rust::{
-    Value,
-    Literal,
-    Field, Testnet3,
-
-};
-use snarkvm_console::program::LiteralType;
+use aleo_rust::{Field, Literal, Testnet3, Value};
 use snarkvm_circuit_program::{Literal as ALiteral, Value as AValue};
-use snarkvm_console::prelude::TypeName;
+use snarkvm_console::{
+    prelude::{ToField, TypeName},
+    program::LiteralType,
+};
+use snarkvm_synthesizer::output_type;
+use std::{ops::Deref, str::FromStr, string};
 
-use snarkvm_circuit_network::Aleo;
-use snarkvm_circuit_network::AleoV0;
-use snarkvm_wasm::FromBytes;
-use snarkvm_circuit_environment::{Eject, Inject, Mode, ToBits as AToBits};
 use aleo_rust::ToBytes;
+use snarkvm_circuit_environment::{Eject, Inject, Mode, ToBits as AToBits};
+use snarkvm_circuit_network::{Aleo, AleoV0};
+use snarkvm_wasm::FromBytes;
 
 // Facilities for cross-platform logging in both web browsers and nodeJS
 #[wasm_bindgen]
@@ -199,30 +194,38 @@ extern "C" {
 }
 
 #[wasm_bindgen(js_name = "base58")]
-pub fn Base58(input: &str, action: &str) ->  Result<String, String> {
+pub fn Base58(input: &str, action: &str) -> Result<String, String> {
     match action {
         "encode" => {
             let bytes = bs58::encode(input.as_bytes().to_vec()).into_vec();
-            let num = u64::from_be_bytes(bytes[..].try_into().map_err(|e| format!("invalid decode from_be_bytes : {e}"))?);
-            Ok(format!("{}.{}{}",bs58::encode(input.as_bytes().to_vec()).into_string() , num, Field::<Testnet3>::type_name()))
-        },
+            let encodecode = bs58::encode("PowerVotingToken".as_bytes().to_vec()).into_string();
+
+            let big_int = BigUint::from_bytes_be(&bytes);
+            let big_int_str = big_int.to_string();
+            log(&format!("{} {}", encodecode, big_int_str));
+            Ok(format!("{}{}", big_int_str, Field::<Testnet3>::type_name()))
+        }
         "decode" => {
-            let input = u64::to_be_bytes(u64::from_str(input).unwrap()).to_vec();
-            let bytes = bs58::decode(input).into_vec().map_err(|e| format!("invalid decode: {e}"))?;
-            let s = String::from_utf8(bytes).map_err(|e| format!("invalid from_utf8: {e}"))?;
-            Ok(s)
+            let input = if input.ends_with("field") { &input[..input.len() - "field".len()] } else { input };
+            if let Some(bitint) = BigUint::parse_bytes(input.as_bytes(), 10) {
+                let bytes = bitint.to_bytes_be();
+                let encodecode = String::from_utf8(bytes.clone()).map_err(|e| format!("invalid encodecode from_utf8: {e}"))?;
+                let bytes = bs58::decode(&encodecode).into_vec().map_err(|e| format!("invalid decode encodecode: {e}"))?;
+                let decodecode = String::from_utf8(bytes.clone()).map_err(|e| format!("invalid decodecode from_utf8: {e}"))?;
+                return Ok(decodecode);
+            };
+            Err("BigUint parse_bytes err".to_string())
         }
-        &_ => {
-            Err("Invalid base58 action ,use (encode or decode)".to_string())
-        }
+        &_ => Err("Invalid base58 action ,use (encode or decode)".to_string()),
     }
 }
 
 #[wasm_bindgen(js_name = "hashBHP")]
-pub fn hash_bhp(input: String, bhptype: &str, destination_type: &str) ->  Result<String, String> {
+pub fn hash_bhp(input: String, bhptype: &str, destination_type: &str) -> Result<String, String> {
     let value = Value::<Testnet3>::from_str(&input).map_err(|e| format!("invalid input: {e}"))?;
     let avalue = AValue::<AleoV0>::new(Mode::Public, value.clone());
-    let destination_type = LiteralType::from_str(destination_type).map_err(|e| format!("invalid destination type: {e}"))?;
+    let destination_type =
+        LiteralType::from_str(destination_type).map_err(|e| format!("invalid destination type: {e}"))?;
     let output_type = match bhptype {
         "bhp256" => ALiteral::Group(Aleo::hash_to_group_bhp256(&avalue.to_bits_le())),
         "bhp512" => ALiteral::Group(Aleo::hash_to_group_bhp512(&avalue.to_bits_le())),
@@ -230,9 +233,7 @@ pub fn hash_bhp(input: String, bhptype: &str, destination_type: &str) ->  Result
         "bhp1024" => ALiteral::Group(Aleo::hash_to_group_bhp1024(&avalue.to_bits_le())),
         _ => return Err("Invalid bhptype type".to_string()),
     };
-    let output = output_type
-        .downcast_lossy(destination_type)
-        .map_err(|e| format!("failed to downcast: {e}"))?;
+    let output = output_type.downcast_lossy(destination_type).map_err(|e| format!("failed to downcast: {e}"))?;
 
     let fieldbytes = literal_to_bytes(output.eject_value()).map_err(|e| format!("literal_to_bytes: {e}"))?;
 
