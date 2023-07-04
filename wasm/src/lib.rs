@@ -172,6 +172,7 @@ pub use wasm_bindgen_rayon::init_thread_pool;
 
 use snarkvm_synthesizer::output_type;
 use snarkvm_console::prelude::ToField;
+use std::string;
 use std::{ops::Deref, str::FromStr};
 use aleo_rust::{
     Value,
@@ -201,12 +202,15 @@ extern "C" {
 pub fn Base58(input: &str, action: &str) ->  Result<String, String> {
     match action {
         "encode" => {
-            Ok(bs58::encode(input.as_bytes().to_vec()).into_string())
+            let bytes = bs58::encode(input.as_bytes().to_vec()).into_vec();
+            let num = u64::from_be_bytes(bytes[..].try_into().map_err(|e| format!("invalid decode from_be_bytes : {e}"))?);
+            Ok(format!("{}.{}{}",bs58::encode(input.as_bytes().to_vec()).into_string() , num, Field::<Testnet3>::type_name()))
         },
         "decode" => {
+            let input = u64::to_be_bytes(u64::from_str(input).unwrap()).to_vec();
             let bytes = bs58::decode(input).into_vec().map_err(|e| format!("invalid decode: {e}"))?;
-            let decodestr = String::from_utf8(bytes).map_err(|e| format!("invalid from_utf8: {e}"))?;
-            Ok(decodestr)
+            let s = String::from_utf8(bytes).map_err(|e| format!("invalid from_utf8: {e}"))?;
+            Ok(s)
         }
         &_ => {
             Err("Invalid base58 action ,use (encode or decode)".to_string())
