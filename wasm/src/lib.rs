@@ -197,6 +197,23 @@ extern "C" {
     fn log(s: &str);
 }
 
+#[wasm_bindgen(js_name = "base58")]
+pub fn Base58(input: &str, action: &str) ->  Result<String, String> {
+    match action {
+        "encode" => {
+            Ok(bs58::encode(input.as_bytes().to_vec()).into_string())
+        },
+        "decode" => {
+            let bytes = bs58::decode(input).into_vec().map_err(|e| format!("invalid decode: {e}"))?;
+            let decodestr = String::from_utf8(bytes).map_err(|e| format!("invalid from_utf8: {e}"))?;
+            Ok(decodestr)
+        }
+        &_ => {
+            Err("Invalid base58 action ,use (encode or decode)".to_string())
+        }
+    }
+}
+
 #[wasm_bindgen(js_name = "hashBHP")]
 pub fn hash_bhp(input: String, bhptype: &str, destination_type: &str) ->  Result<String, String> {
     let value = Value::<Testnet3>::from_str(&input).map_err(|e| format!("invalid input: {e}"))?;
