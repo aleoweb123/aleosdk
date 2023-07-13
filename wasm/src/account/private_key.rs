@@ -50,7 +50,7 @@ pub struct RecordData<N: Network> {
     transition_id: String,
     function_name: String,
     output_index: u8,
-    input: String,
+    input: Vec<String>,
 }
 
 #[derive(Deserialize)]
@@ -64,7 +64,7 @@ pub struct RecordOrgData {
     transition_id: String,
     function_name: String,
     output_index: u8,
-    input: String,
+    input: Vec<String>,
 }
 
 #[wasm_bindgen]
