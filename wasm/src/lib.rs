@@ -190,7 +190,7 @@ use snarkvm_wasm::FromBytes;
 extern "C" {
     // Log a &str the console in the browser or console.log in nodejs
     #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
+    pub fn log(s: &str);
 }
 
 #[wasm_bindgen(js_name = "base58")]
