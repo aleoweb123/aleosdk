@@ -91,9 +91,9 @@ version = "0.3.37"
 default = [ "serial", "browser" ]
 serial = [ "aleo-rust/serial" ]
 parallel = [ "wasm-bindgen-rayon", "rayon" ]
-profiler = [ "snarkvm-synthesizer/profiler" ]
-vm_timer = [ "snarkvm-synthesizer/timer" ]
-vm_aleo-cli = [ "snarkvm-synthesizer/aleo-cli" ]
+# profiler = [ "snarkvm-synthesizer/profiler" ]
+# vm_timer = [ "snarkvm-synthesizer/timer" ]
+# vm_aleo-cli = [ "snarkvm-synthesizer/aleo-cli" ]
 browser = [ ]
 
 ## Profiles

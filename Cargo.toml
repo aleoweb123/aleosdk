@@ -53,6 +53,18 @@ git = "https://github.com/aleoweb123/snarkVM.git"
 git = "https://github.com/aleoweb123/snarkVM.git"
 # branch = "testnet3"
 
+[workspace.dependencies.snarkvm-ledger-block]
+git = "https://github.com/aleoweb123/snarkVM.git"
+# branch = "testnet3"
+
+[workspace.dependencies.snarkvm-ledger-store]
+git = "https://github.com/aleoweb123/snarkVM.git"
+# branch = "testnet3"
+
+[workspace.dependencies.snarkvm-ledger-query]
+git = "https://github.com/aleoweb123/snarkVM.git"
+# branch = "testnet3"
+
 [workspace.dependencies.snarkvm-wasm]
 git = "https://github.com/aleoweb123/snarkVM.git"
 # branch = "testnet3"
