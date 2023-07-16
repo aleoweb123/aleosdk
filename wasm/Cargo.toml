@@ -63,6 +63,23 @@ version = "0.11.18"
 [dependencies.serde_json]
 version = "1.0"
 
+[dependencies.snarkvm-console]
+workspace = true
+features = [ "wasm" ]
+
+[dependencies.snarkvm-circuit-network]
+workspace = true
+
+[dependencies.snarkvm-circuit-program]
+workspace = true
+
+[dependencies.snarkvm-circuit-environment]
+workspace = true
+
+[dependencies.snarkvm-synthesizer]
+workspace = true
+features = [ "wasm" ]
+
 [dependencies.snarkvm-wasm]
 workspace = true
 features = [ "console", "fields", "utilities" ]

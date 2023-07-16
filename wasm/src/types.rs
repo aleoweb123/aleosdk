@@ -25,19 +25,6 @@ pub use aleo_rust::{
     Identifier,
     Plaintext,
     PrivateKey,
-    ProgramID,
-    Record,
-    Signature,
-    Testnet3,
-    ViewKey,
-    Value,
-};
-use snarkvm_circuit_network::AleoV0;
-use snarkvm_console::program::{ProgramOwner, Response};
-use snarkvm_synthesizer::{
-    helpers::memory::BlockMemory,
-    snark::{ProvingKey, VerifyingKey},
-    Deployment,
     Process,
     Program,
     ProgramID,
@@ -49,9 +36,10 @@ use snarkvm_synthesizer::{
     Signature,
     Testnet3,
     Transaction,
-    VM,
+    VerifyingKey,
+    ViewKey,
     ConsensusStore,
-    store::helpers::memory::ConsensusMemory,
+    VM,
 };
 
 pub use snarkvm_wasm::{network::Environment, FromBytes, PrimeField, ToBytes};
@@ -65,10 +53,6 @@ pub type ViewKeyNative = ViewKey<CurrentNetwork>;
 // Network types
 pub type CurrentNetwork = Testnet3;
 pub type CurrentAleo = AleoV0;
-pub type ValueNative = Value<CurrentNetwork>;
-pub type ConsensusStoreNative = ConsensusStore<CurrentNetwork, ConsensusMemory<CurrentNetwork>>;
-pub type ConsensusMemoryNative = ConsensusMemory<CurrentNetwork>;
-pub type VMNative = VM<CurrentNetwork, ConsensusMemory<CurrentNetwork>>;
 
 // Record types
 pub type CiphertextNative = Ciphertext<CurrentNetwork>;

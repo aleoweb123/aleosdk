@@ -169,15 +169,13 @@ use num_bigint::BigUint;
 #[cfg(feature = "parallel")]
 pub use wasm_bindgen_rayon::init_thread_pool;
 
-// use crate::types::{AValueNative, ALiteralNative, ProgramNative, ValueNative, LiteralNative,FieldlNative, LiteralTypeNative};
-
 use aleo_rust::{Field, Literal, Testnet3, Value};
 use snarkvm_circuit_program::{Literal as ALiteral, Value as AValue};
 use snarkvm_console::{
     prelude::{ToField, TypeName},
     program::LiteralType,
 };
-use snarkvm_synthesizer::output_type;
+use snarkvm_synthesizer::program::output_type;
 use std::{ops::Deref, str::FromStr, string};
 
 use aleo_rust::ToBytes;
