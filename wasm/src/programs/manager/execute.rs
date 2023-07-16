@@ -171,7 +171,7 @@ impl ProgramManager {
         }
         fee_microcredits = fee_microcredits + storage_cost + finalize_cost;
 
-        log(&format!("Executing fee {fee_microcredits} (storage_cost:{storage_cost} finalize_cost:{storage_cost})"));
+        log(&format!("Executing fee {fee_microcredits} (storage_cost:{storage_cost} finalize_cost:{finalize_cost})"));
         let fee = execute_fee!(
             process,
             private_key,
