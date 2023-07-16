@@ -117,7 +117,7 @@ impl ProgramManager {
         fee_verifying_key: Option<VerifyingKey>,
     ) -> Result<Transaction, String> {
         log(&format!("Executing function: {function} on-chain"));
-        let fee_microcredits = Self::validate_amount(fee_credits, &fee_record, true)?;
+        let mut fee_microcredits = Self::validate_amount(fee_credits, &fee_record, true)?;
 
         let mut new_process;
         let process = get_process!(self, cache, new_process);
@@ -150,7 +150,28 @@ impl ProgramManager {
             .map_err(|e| e.to_string())?;
         let execution_id = execution.to_execution_id().map_err(|e| e.to_string())?;
 
-        log("Executing fee");
+        // Get the storage cost in bytes for the program execution
+        let storage_cost = execution.size_in_bytes().map_err(|e| e.to_string())?;
+
+        // Compute the finalize cost in microcredits.
+        let mut finalize_cost = 0u64;
+        // Iterate over the transitions to accumulate the finalize cost.
+        for transition in execution.transitions() {
+            // Retrieve the function name.
+            let function_name = transition.function_name();
+            // Retrieve the finalize cost.
+            let cost = match &program.get_function(function_name).map_err(|e| e.to_string())?.finalize() {
+                Some((_, finalize)) => cost_in_microcredits(finalize).map_err(|e| e.to_string())?,
+                None => continue,
+            };
+            // Accumulate the finalize cost.
+            finalize_cost = finalize_cost
+                .checked_add(cost)
+                .ok_or("The finalize cost computation overflowed for an execution".to_string())?;
+        }
+        fee_microcredits = fee_microcredits + storage_cost + finalize_cost;
+
+        log(&format!("Executing fee {fee_microcredits} (storage_cost:{storage_cost} finalize_cost:{storage_cost})"));
         let fee = execute_fee!(
             process,
             private_key,
