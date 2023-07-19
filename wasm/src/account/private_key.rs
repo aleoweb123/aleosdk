@@ -57,7 +57,7 @@ pub struct RecordData<N: Network> {
 #[derive(Deserialize)]
 pub struct RecordOrgData {
     record_ciphertext: String,
-    record_name: String,
+    identifier: String,
     program_id: String,
     height: u32,
     timestamp: i64,
@@ -158,11 +158,11 @@ impl PrivateKey {
                 if let Ok(plaintext) = record.decrypt(&ViewKey::from_private_key(&self)) {
                     let program_id = record_org.program_id.clone();
 
-                    let record_name = &record_org.record_name;
+                    let record_name = &record_org.identifier;
                     if let Ok(serial_number) = plaintext.serial_number_string(&self, &program_id, record_name) {
                         let record_data: RecordData<CurrentNetwork> = RecordData {
                             record: plaintext.deref().clone(),
-                            record_name: record_org.record_name,
+                            record_name: record_org.identifier,
                             serial_number,
                             program_id,
                             height: record_org.height,
