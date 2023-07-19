@@ -41,7 +41,7 @@ pub struct OldRecordData<N: Network> {
 #[derive(Serialize)]
 pub struct RecordData<N: Network> {
     record: Record<N, Plaintext<N>>,
-    record_name: String,
+    identifier: String,
     serial_number: String,
     program_id: String,
     height: u32,
@@ -162,7 +162,7 @@ impl PrivateKey {
                     if let Ok(serial_number) = plaintext.serial_number_string(&self, &program_id, record_name) {
                         let record_data: RecordData<CurrentNetwork> = RecordData {
                             record: plaintext.deref().clone(),
-                            record_name: record_org.identifier,
+                            identifier: record_org.identifier,
                             serial_number,
                             program_id,
                             height: record_org.height,
