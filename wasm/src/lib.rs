@@ -218,6 +218,23 @@ pub fn Base58(input: &str, action: &str) -> Result<String, String> {
     }
 }
 
+#[wasm_bindgen(js_name = "jsbase58")]
+pub fn js_base58(input: &str, action: &str) -> Result<String, String> {
+    match action {
+        "encode" => {
+            let bytes = hex::decode(input).unwrap();
+            let encode_str = bs58::encode(bytes).into_string();
+            return Ok(encode_str);
+        }
+        "decode" => {
+            let bytes: Vec<u8> = bs58::decode(input).into_vec().map_err(|e| format!("invalid decode {e}"))?;
+            let decodecode = hex::encode(bytes);
+            return Ok(decodecode);
+        }
+        &_ => Err("Invalid base58 action ,use (encode or decode)".to_string()),
+    }
+}
+
 #[wasm_bindgen(js_name = "hashBHP")]
 pub fn hash_bhp(input: String, bhptype: &str, destination_type: &str) -> Result<String, String> {
     let value = Value::<Testnet3>::from_str(&input).map_err(|e| format!("invalid input: {e}"))?;
