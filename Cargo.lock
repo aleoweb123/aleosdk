@@ -39,7 +39,7 @@ dependencies = [
 
 [[package]]
 name = "aleo"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "aleo-rust",
  "anyhow",
@@ -63,7 +63,7 @@ dependencies = [
 
 [[package]]
 name = "aleo-development-server"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "aleo-rust",
  "anyhow",
@@ -86,7 +86,7 @@ dependencies = [
 
 [[package]]
 name = "aleo-rust"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "anyhow",
  "bencher",
@@ -172,7 +172,7 @@ checksum = "7e4f181fc1a372e8ceff89612e5c9b13f72bff5b066da9f8d6827ae65af492c4"
 
 [[package]]
 name = "aleo-wasm"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "aleo-rust",
  "anyhow",
@@ -430,9 +430,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.3.12"
+version = "4.3.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3eab9e8ceb9afdade1ab3f0fd8dbce5b1b2f468ad653baf10e771781b2b67b73"
+checksum = "5fd304a20bff958a57f04c4e96a2e7594cc4490a0e809cbd48bb6437edaa452d"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -441,9 +441,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.3.12"
+version = "4.3.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f2763db829349bf00cfc06251268865ed4363b93a943174f638daf3ecdba2cd"
+checksum = "01c6a3f08f1fe5662a35cfe393aec09c4df95f60ee93b7556505260f75eee9e1"
 dependencies = [
  "anstream",
  "anstyle",
@@ -673,6 +673,12 @@ dependencies = [
  "redox_users",
  "winapi",
 ]
+
+[[package]]
+name = "dotenvy"
+version = "0.15.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
 
 [[package]]
 name = "either"
@@ -2089,18 +2095,18 @@ checksum = "b0293b4b29daaf487284529cc2f5675b8e57c61f70167ba415a463651fd6a918"
 
 [[package]]
 name = "serde"
-version = "1.0.171"
+version = "1.0.176"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30e27d1e4fd7659406c492fd6cfaf2066ba8773de45ca75e855590f856dc34a9"
+checksum = "76dc28c9523c5d70816e393136b86d48909cfb27cecaa902d338c19ed47164dc"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.171"
+version = "1.0.176"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "389894603bd18c46fa56231694f8d827779c0951a667087194cf9de94ed24682"
+checksum = "a4e7b8c5dc823e3b90651ff1d3808419cd14e5ad76de04feaf37da114e7a306f"
 dependencies = [
  "proc-macro2",
  "quote 1.0.30",
@@ -2207,6 +2213,7 @@ dependencies = [
  "anyhow",
  "clap",
  "colored",
+ "dotenvy",
  "indexmap 2.0.0",
  "num-format",
  "once_cell",
