@@ -10,14 +10,14 @@ import {
     Row,
     Result,
     Spin,
-    Space
+    Space,
 } from "antd";
+import { CodeEditor } from "./execute/CodeEditor.jsx";
 import axios from "axios";
-import init, * as aleo from "@aleohq/wasm";
-
-await init();
 
 export const Deploy = () => {
+    
+    const [form] = Form.useForm();
     const [deploymentFeeRecord, setDeploymentFeeRecord] = useState(null);
     const [deployUrl, setDeployUrl] = useState("https://vm.aleo.org/api");
     const [deploymentFee, setDeploymentFee] = useState("1");
@@ -37,23 +37,11 @@ export const Deploy = () => {
         );
         worker.addEventListener("message", (ev) => {
             if (ev.data.type == "DEPLOY_TRANSACTION_COMPLETED") {
-                let [deployTransaction, url] = ev.data.deployTransaction;
-                axios
-                    .post(
-                        url + "/testnet3/transaction/broadcast",
-                        deployTransaction,
-                        {
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                        },
-                    )
-                    .then((response) => {
-                        setFeeLoading(false);
-                        setLoading(false);
-                        setDeploymentError(null);
-                        setTransactionID(response.data);
-                    });
+                let transactionId = ev.data.deployTransaction;
+                setFeeLoading(false);
+                setLoading(false);
+                setDeploymentError(null);
+                setTransactionID(transactionId);
             } else if (ev.data.type == "DEPLOYMENT_FEE_ESTIMATION_COMPLETED") {
                 let fee = ev.data.deploymentFee;
                 setFeeLoading(false);
@@ -132,7 +120,9 @@ export const Deploy = () => {
         setLoading(false);
         setTransactionID(null);
         setDeploymentError(null);
-        messageApi.info("Disclaimer: Fee estimation is experimental and may not represent a correct estimate on any current or future network");
+        messageApi.info(
+            "Disclaimer: Fee estimation is experimental and may not represent a correct estimate on any current or future network",
+        );
         await postMessagePromise(worker, {
             type: "ALEO_ESTIMATE_DEPLOYMENT_FEE",
             program: programString(),
@@ -145,7 +135,7 @@ export const Deploy = () => {
         setLoading(false);
         setTransactionID(null);
         setDeploymentError(null);
-        setProgram(
+        await onLoadProgram(
             "program hello_hello.aleo;\n" +
                 "\n" +
                 "function hello:\n" +
@@ -155,6 +145,14 @@ export const Deploy = () => {
                 "    output r2 as u32.private;\n",
         );
     };
+    const onLoadProgram = async (value) => {
+        if (value) {
+            form.setFieldsValue({
+                program: value,
+            });
+            await onProgramChange(value);
+        }
+    };
 
     const onUrlChange = (event) => {
         if (event.target.value !== null) {
@@ -163,10 +161,11 @@ export const Deploy = () => {
         return deployUrl;
     };
 
-    const onProgramChange = (event) => {
-        if (event.target.value !== null) {
-            setProgram(event.target.value);
-        }
+    const onProgramChange = (value) => {
+        // if (event.target.value !== null) {
+        //     setProgram(event.target.value);
+        // }
+        setProgram(value);
         setTransactionID(null);
         setDeploymentError(null);
         return program;
@@ -214,12 +213,10 @@ export const Deploy = () => {
     return (
         <Card
             title="Deploy Program"
-            style={{ width: "100%", borderRadius: "20px" }}
-            bordered={false}
+            style={{ width: "100%"}}
             extra={
                 <Button
                     type="primary"
-                    shape="round"
                     size="middle"
                     onClick={demo}
                 >
@@ -227,21 +224,22 @@ export const Deploy = () => {
                 </Button>
             }
         >
-            <Form {...layout}>
+            <Form
+                form={form} 
+                {...layout}>
                 <Divider />
-                <Form.Item label="Program" colon={false}>
-                    <Input.TextArea
-                        size="large"
-                        rows={10}
-                        placeholder="Program"
-                        style={{
-                            whiteSpace: "pre-wrap",
-                            overflowWrap: "break-word",
-                        }}
-                        value={programString()}
-                        onChange={onProgramChange}
-                    />
-                </Form.Item>
+                    <Form.Item
+                        label="Program"
+                        name="program"
+                        rules={[
+                            {
+                                required: true,
+                                message: "Please input or load an Aleo program",
+                            },
+                        ]}
+                    >
+                        <CodeEditor onChange={onProgramChange} />
+                    </Form.Item>
                 <Divider />
                 <Form.Item
                     label="Private Key"
@@ -300,7 +298,7 @@ export const Deploy = () => {
                         <Space>
                             <Button
                                 type="primary"
-                                shape="round"
+                                
                                 size="middle"
                                 onClick={deploy}
                             >
@@ -309,7 +307,7 @@ export const Deploy = () => {
                             {contextHolder}
                             <Button
                                 type="primary"
-                                shape="round"
+                                
                                 size="middle"
                                 onClick={estimate}
                             >

@@ -17,9 +17,9 @@
 use crate::{
     account::PrivateKey,
     types::{IdentifierNative, ProgramIDNative, RecordPlaintextNative},
+    Credits,
 };
 
-use aleo_rust::Credits;
 use std::{ops::Deref, str::FromStr};
 use wasm_bindgen::prelude::*;
 
@@ -53,6 +53,14 @@ impl RecordPlaintext {
     /// @returns {u64} Amount of microcredits in the record
     pub fn microcredits(&self) -> u64 {
         self.0.microcredits().unwrap_or(0)
+    }
+
+    /// Returns the nonce of the record. This can be used to uniquely identify a record.
+    ///
+    /// @returns {string} Nonce of the record
+    #[wasm_bindgen(js_name = nonce)]
+    pub fn nonce(&self) -> String {
+        self.0.nonce().to_string()
     }
 
     /// Attempt to get the serial number of a record to determine whether or not is has been spent

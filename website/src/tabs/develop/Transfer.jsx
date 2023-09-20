@@ -25,22 +25,10 @@ export const Transfer = () => {
         );
         worker.addEventListener("message", (ev) => {
             if (ev.data.type == "TRANSFER_TRANSACTION_COMPLETED") {
-                let [transaction, url] = ev.data.transferTransaction;
-                axios
-                    .post(
-                        url + "/testnet3/transaction/broadcast",
-                        transaction,
-                        {
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                        },
-                    )
-                    .then((response) => {
-                        setLoading(false);
-                        setTransferError(null);
-                        setTransactionID(response.data);
-                    });
+                const transactionId = ev.data.transferTransaction;
+                setLoading(false);
+                setTransferError(null);
+                setTransactionID(transactionId);
             } else if (ev.data.type == "ERROR") {
                 setTransferError(ev.data.errorMessage);
                 setLoading(false);
@@ -229,8 +217,7 @@ export const Transfer = () => {
     return (
         <Card
             title="Transfer"
-            style={{ width: "100%", borderRadius: "20px" }}
-            bordered={false}
+            style={{ width: "100%"}}
             extra={
             <Dropdown menu={{ items, onClick }}>
                 <a onClick={(e) => e.preventDefault()}>
@@ -336,7 +323,7 @@ export const Transfer = () => {
                     <Col justify="center">
                         <Button
                             type="primary"
-                            shape="round"
+                            
                             size="middle"
                             onClick={transfer}
                         >

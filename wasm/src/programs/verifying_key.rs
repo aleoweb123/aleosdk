@@ -18,7 +18,7 @@ use crate::types::{FromBytes, ToBytes, VerifyingKeyNative};
 
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use std::ops::Deref;
+use std::{ops::Deref, str::FromStr};
 
 /// Verifying key for a function within an Aleo program
 #[wasm_bindgen]
@@ -43,6 +43,32 @@ impl VerifyingKey {
     pub fn to_bytes(&self) -> Result<Vec<u8>, String> {
         self.0.to_bytes_le().map_err(|_| "Failed to serialize verifying key".to_string())
     }
+
+    /// Create a verifying key from string
+    ///
+    /// @param {String} string String representation of a verifying key
+    /// @returns {VerifyingKey | Error}
+    #[wasm_bindgen(js_name = "fromString")]
+    pub fn from_string(string: &str) -> Result<VerifyingKey, String> {
+        Ok(Self(VerifyingKeyNative::from_str(string).map_err(|e| e.to_string())?))
+    }
+
+    /// Get a string representation of the verifying key
+    ///
+    /// @returns {String} String representation of the verifying key
+    #[wasm_bindgen(js_name = "toString")]
+    #[allow(clippy::inherent_to_string)]
+    pub fn to_string(&self) -> String {
+        self.0.to_string()
+    }
+
+    /// Create a copy of the verifying key
+    ///
+    /// @returns {VerifyingKey} A copy of the verifying key
+    #[wasm_bindgen]
+    pub fn copy(&self) -> VerifyingKey {
+        self.0.clone().into()
+    }
 }
 
 impl Deref for VerifyingKey {
@@ -56,6 +82,12 @@ impl Deref for VerifyingKey {
 impl From<VerifyingKey> for VerifyingKeyNative {
     fn from(verifying_key: VerifyingKey) -> VerifyingKeyNative {
         verifying_key.0
+    }
+}
+
+impl From<&VerifyingKey> for VerifyingKeyNative {
+    fn from(verifying_key: &VerifyingKey) -> VerifyingKeyNative {
+        verifying_key.0.clone()
     }
 }
 

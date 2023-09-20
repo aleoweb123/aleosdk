@@ -1,6 +1,6 @@
 [package]
 name = "aleo-wasm"
-version = "0.5.1"
+version = "0.5.9"
 authors = [ "The Aleo Team <hello@aleo.org>" ]
 description = "WebAssembly based toolkit for developing zero knowledge applications with Aleo"
 homepage = "https://aleo.org"
@@ -25,8 +25,30 @@ doctest = false
 version = "0.4.3"
 
 [dependencies.aleo-rust]
+[dependencies.snarkvm-circuit-network]
+version = "0.14.6"
+
+[dependencies.snarkvm-console]
+version = "0.14.6"
 features = [ "wasm" ]
-workspace = true
+
+[dependencies.snarkvm-ledger-block]
+version = "0.14.6"
+
+[dependencies.snarkvm-ledger-query]
+version = "0.14.6"
+features = [ "async" ]
+
+[dependencies.snarkvm-ledger-store]
+version = "0.14.6"
+
+[dependencies.snarkvm-synthesizer]
+version = "0.14.6"
+features = [ "async" ]
+
+[dependencies.snarkvm-wasm]
+version = "0.14.6"
+features = [ "console", "fields", "utilities" ]
 
 [dependencies.anyhow]
 version = "1.0"
@@ -49,6 +71,9 @@ version = "0.4.3"
 
 [dependencies.js-sys]
 version = "0.3"
+
+[dependencies.once_cell]
+version = "1.18.0"
 
 [dependencies.rand]
 version = "0.8"
@@ -83,6 +108,8 @@ features = [ "wasm" ]
 [dependencies.snarkvm-wasm]
 workspace = true
 features = [ "console", "fields", "utilities" ]
+[build-dependencies.walkdir]
+version = "2"
 
 [dependencies.wasm-bindgen]
 version = "0.2"
@@ -99,14 +126,14 @@ optional = true
 version = "0.1.7"
 
 [dependencies.serde]
-version = "1.0.176"
+version = "1.0.183"
 
 [dev-dependencies.wasm-bindgen-test]
 version = "0.3.37"
 
 [features]
 default = [ "serial", "browser" ]
-serial = [ "aleo-rust/serial" ]
+serial = [ "snarkvm-console/serial", "snarkvm-synthesizer/serial", "snarkvm-ledger-query/serial", "snarkvm-ledger-block/serial", "snarkvm-ledger-store/serial" ]
 parallel = [ "wasm-bindgen-rayon", "rayon" ]
 # profiler = [ "snarkvm-synthesizer/profiler" ]
 # vm_timer = [ "snarkvm-synthesizer/timer" ]

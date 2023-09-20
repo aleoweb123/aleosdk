@@ -18,6 +18,8 @@ use crate::{
     account::{Address, PrivateKeyCiphertext, Signature, ViewKey},
     record::RecordCiphertext,
     types::{CurrentNetwork, Encryptor, Environment, FromBytes, PrimeField, PrivateKeyNative, ToBytes},
+    account::{Address, Encryptor, PrivateKeyCiphertext, Signature, ViewKey},
+    types::{CurrentNetwork, Environment, FromBytes, PrimeField, PrivateKeyNative, ToBytes},
 };
 
 use core::{convert::TryInto, fmt, ops::Deref, str::FromStr};

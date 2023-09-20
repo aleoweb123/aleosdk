@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Aleo SDK library. If not, see <https://www.gnu.org/licenses/>.
 
-use crate::types::{CurrentNetwork, IdentifierNative, ProgramNative};
-use aleo_rust::{EntryType, PlaintextType, ValueType};
+use crate::types::{CurrentNetwork, EntryType, IdentifierNative, PlaintextType, ProgramNative, ValueType};
 
 use js_sys::{Array, Object, Reflect};
 use std::{ops::Deref, str::FromStr};
@@ -48,6 +47,15 @@ impl Program {
     #[allow(clippy::inherent_to_string)]
     pub fn to_string(&self) -> String {
         self.0.to_string()
+    }
+
+    /// Determine if a function is present in the program
+    ///
+    /// @param {string} functionName Name of the function to check for
+    /// @returns {boolean} True if the program is valid, false otherwise
+    #[wasm_bindgen(js_name = "hasFunction")]
+    pub fn has_function(&self, function_name: &str) -> bool {
+        IdentifierNative::from_str(function_name).map_or(false, |identifier| self.0.contains_function(&identifier))
     }
 
     /// Get javascript array of functions names in the program
