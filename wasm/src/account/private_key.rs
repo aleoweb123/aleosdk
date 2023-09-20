@@ -15,18 +15,15 @@
 // along with the Aleo SDK library. If not, see <https://www.gnu.org/licenses/>.
 
 use crate::{
-    account::{Address, PrivateKeyCiphertext, Signature, ViewKey},
-    record::RecordCiphertext,
-    types::{CurrentNetwork, Encryptor, Environment, FromBytes, PrimeField, PrivateKeyNative, ToBytes},
     account::{Address, Encryptor, PrivateKeyCiphertext, Signature, ViewKey},
-    types::{CurrentNetwork, Environment, FromBytes, PrimeField, PrivateKeyNative, ToBytes},
+    record::RecordCiphertext,
+    types::{CurrentNetwork, Network, Environment, FromBytes, PrimeField, Field, PrivateKeyNative, ToBytes, RecordPlaintextNative as Record},
 };
 
 use core::{convert::TryInto, fmt, ops::Deref, str::FromStr};
 use rand::{rngs::StdRng, SeedableRng};
 use wasm_bindgen::prelude::*;
 
-use aleo_rust::{Network, Plaintext, Record};
 use serde::{Deserialize, Serialize};
 
 #[wasm_bindgen]
@@ -35,14 +32,14 @@ pub struct PrivateKey(PrivateKeyNative);
 
 #[derive(Serialize)]
 pub struct OldRecordData<N: Network> {
-    record: Record<N, Plaintext<N>>,
+    record: Record,
     transactionid: N::TransitionID,
-    serial_number: aleo_rust::Field<aleo_rust::Testnet3>,
+    serial_number: Field<CurrentNetwork>,
 }
 
 #[derive(Serialize)]
-pub struct RecordData<N: Network> {
-    record: Record<N, Plaintext<N>>,
+pub struct RecordData {
+    record: Record,
     identifier: String,
     serial_number: String,
     program_id: String,
@@ -184,7 +181,7 @@ impl PrivateKey {
 
                     let record_name = &record_org.identifier;
                     if let Ok(serial_number) = plaintext.serial_number_string(&self, &program_id, record_name) {
-                        let record_data: RecordData<CurrentNetwork> = RecordData {
+                        let record_data: RecordData = RecordData {
                             record: plaintext.deref().clone(),
                             identifier: record_org.identifier,
                             serial_number,

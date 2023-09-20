@@ -43,18 +43,6 @@ pub use snarkvm_synthesizer::{
     snark::{ProvingKey, VerifyingKey},
     Process,
     Program,
-    ProgramID,
-    ProgramOwner,
-    ProvingKey,
-    Query,
-    Record,
-    Response,
-    Signature,
-    Testnet3,
-    Transaction,
-    VerifyingKey,
-    ViewKey,
-    ConsensusStore,
     VM,
 };
 pub use snarkvm_wasm::{network::Environment, FromBytes, PrimeField, ToBytes, Uniform};

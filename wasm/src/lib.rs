@@ -164,27 +164,12 @@ pub use record::*;
 pub(crate) mod types;
 
 use wasm_bindgen::prelude::*;
-use num_bigint::BigUint;
 
 use std::str::FromStr;
 
 use crate::types::RecordPlaintextNative;
 #[cfg(feature = "parallel")]
 pub use wasm_bindgen_rayon::init_thread_pool;
-
-use aleo_rust::{Field, Literal, Testnet3, Value};
-use snarkvm_circuit_program::{Literal as ALiteral, Value as AValue};
-use snarkvm_console::{
-    prelude::{ToField, TypeName},
-    program::LiteralType,
-};
-use snarkvm_synthesizer::program::output_type;
-use std::{ops::Deref, str::FromStr, string};
-
-use aleo_rust::ToBytes;
-use snarkvm_circuit_environment::{Eject, Inject, Mode, ToBits as AToBits};
-use snarkvm_circuit_network::{Aleo, AleoV0};
-use snarkvm_wasm::FromBytes;
 
 // Facilities for cross-platform logging in both web browsers and nodeJS
 #[wasm_bindgen]
@@ -194,89 +179,6 @@ extern "C" {
     pub fn log(s: &str);
 }
 
-#[wasm_bindgen(js_name = "base58")]
-pub fn Base58(input: &str, action: &str) -> Result<String, String> {
-    match action {
-        "encode" => {
-            let bytes = bs58::encode(input.as_bytes().to_vec()).into_vec();
-            let encodecode = bs58::encode(input.as_bytes().to_vec()).into_string();
-
-            let big_int = BigUint::from_bytes_be(&bytes);
-            let big_int_str = big_int.to_string();
-            log(&format!("{} {}", encodecode, big_int_str));
-            Ok(format!("{}{}", big_int_str, Field::<Testnet3>::type_name()))
-        }
-        "decode" => {
-            let input = if input.ends_with("field") { &input[..input.len() - "field".len()] } else { input };
-            if let Some(bitint) = BigUint::parse_bytes(input.as_bytes(), 10) {
-                let bytes = bitint.to_bytes_be();
-                let encodecode = String::from_utf8(bytes.clone()).map_err(|e| format!("invalid encodecode from_utf8: {e}"))?;
-                let bytes = bs58::decode(&encodecode).into_vec().map_err(|e| format!("invalid decode encodecode: {e}"))?;
-                let decodecode = String::from_utf8(bytes.clone()).map_err(|e| format!("invalid decodecode from_utf8: {e}"))?;
-                return Ok(decodecode);
-            };
-            Err("BigUint parse_bytes err".to_string())
-        }
-        &_ => Err("Invalid base58 action ,use (encode or decode)".to_string()),
-    }
-}
-
-#[wasm_bindgen(js_name = "jsbase58")]
-pub fn js_base58(input: &str, action: &str) -> Result<String, String> {
-    match action {
-        "encode" => {
-            let bytes = hex::decode(input).unwrap();
-            let encode_str = bs58::encode(bytes).into_string();
-            return Ok(encode_str);
-        }
-        "decode" => {
-            let bytes: Vec<u8> = bs58::decode(input).into_vec().map_err(|e| format!("invalid decode {e}"))?;
-            let decodecode = hex::encode(bytes);
-            return Ok(decodecode);
-        }
-        &_ => Err("Invalid base58 action ,use (encode or decode)".to_string()),
-    }
-}
-
-#[wasm_bindgen(js_name = "hashBHP")]
-pub fn hash_bhp(input: String, bhptype: &str, destination_type: &str) -> Result<String, String> {
-    let value = Value::<Testnet3>::from_str(&input).map_err(|e| format!("invalid input: {e}"))?;
-    let avalue = AValue::<AleoV0>::new(Mode::Public, value.clone());
-    let destination_type =
-        LiteralType::from_str(destination_type).map_err(|e| format!("invalid destination type: {e}"))?;
-    let output_type = match bhptype {
-        "bhp256" => ALiteral::Group(Aleo::hash_to_group_bhp256(&avalue.to_bits_le())),
-        "bhp512" => ALiteral::Group(Aleo::hash_to_group_bhp512(&avalue.to_bits_le())),
-        "bhp768" => ALiteral::Group(Aleo::hash_to_group_bhp768(&avalue.to_bits_le())),
-        "bhp1024" => ALiteral::Group(Aleo::hash_to_group_bhp1024(&avalue.to_bits_le())),
-        _ => return Err("Invalid bhptype type".to_string()),
-    };
-    let output = output_type.downcast_lossy(destination_type).map_err(|e| format!("failed to downcast: {e}"))?;
-
-    let fieldbytes = literal_to_bytes(output.eject_value()).map_err(|e| format!("literal_to_bytes: {e}"))?;
-
-    let field = Field::<Testnet3>::from_bytes_le(&fieldbytes).map_err(|e| format!("invalid fieldbytes: {e}"))?;
-    Ok(format!("{}{}", field, Field::<Testnet3>::type_name()))
-}
-
-fn literal_to_bytes(literal: Literal<Testnet3>) -> anyhow::Result<Vec<u8>> {
-    match literal {
-        Literal::Address(v) => v.to_bytes_le(),
-        Literal::Boolean(v) => v.to_bytes_le(),
-        Literal::Field(v) => v.to_bytes_le(),
-        Literal::Group(v) => v.to_bytes_le(),
-        Literal::I8(v) => v.to_bytes_le(),
-        Literal::I16(v) => v.to_bytes_le(),
-        Literal::I32(v) => v.to_bytes_le(),
-        Literal::I64(v) => v.to_bytes_le(),
-        Literal::I128(v) => v.to_bytes_le(),
-        Literal::U8(v) => v.to_bytes_le(),
-        Literal::U16(v) => v.to_bytes_le(),
-        Literal::U32(v) => v.to_bytes_le(),
-        Literal::U64(v) => v.to_bytes_le(),
-        Literal::U128(v) => v.to_bytes_le(),
-        Literal::Scalar(v) => v.to_bytes_le(),
-        Literal::String(v) => v.to_bytes_le(),
 /// A trait providing convenient methods for accessing the amount of Aleo present in a record
 pub trait Credits {
     /// Get the amount of credits in the record if the record possesses Aleo credits

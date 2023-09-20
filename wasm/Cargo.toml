@@ -21,12 +21,14 @@ edition = "2021"
 crate-type = [ "cdylib", "rlib" ]
 doctest = false
 
-[dependencies.num-bigint]
-version = "0.4.3"
-
-[dependencies.aleo-rust]
 [dependencies.snarkvm-circuit-network]
 version = "0.14.6"
+
+# [dependencies.snarkvm-circuit-program]
+# git = "https://github.com/aleoweb123/snarkVM.git"
+
+# [dependencies.snarkvm-circuit-environment]
+# git = "https://github.com/aleoweb123/snarkVM.git"
 
 [dependencies.snarkvm-console]
 version = "0.14.6"
@@ -57,9 +59,6 @@ version = "1.0"
 version = "0.2"
 features = [ "js" ]
 
-[dependencies.bs58]
-version = "0.5"
-
 [dependencies.indexmap]
 version = "2.0.0"
 
@@ -88,26 +87,6 @@ version = "0.11.18"
 [dependencies.serde_json]
 version = "1.0"
 
-[dependencies.snarkvm-console]
-workspace = true
-features = [ "wasm" ]
-
-[dependencies.snarkvm-circuit-network]
-workspace = true
-
-[dependencies.snarkvm-circuit-program]
-workspace = true
-
-[dependencies.snarkvm-circuit-environment]
-workspace = true
-
-[dependencies.snarkvm-synthesizer]
-workspace = true
-features = [ "wasm" ]
-
-[dependencies.snarkvm-wasm]
-workspace = true
-features = [ "console", "fields", "utilities" ]
 [build-dependencies.walkdir]
 version = "2"
 
@@ -135,9 +114,6 @@ version = "0.3.37"
 default = [ "serial", "browser" ]
 serial = [ "snarkvm-console/serial", "snarkvm-synthesizer/serial", "snarkvm-ledger-query/serial", "snarkvm-ledger-block/serial", "snarkvm-ledger-store/serial" ]
 parallel = [ "wasm-bindgen-rayon", "rayon" ]
-# profiler = [ "snarkvm-synthesizer/profiler" ]
-# vm_timer = [ "snarkvm-synthesizer/timer" ]
-# vm_aleo-cli = [ "snarkvm-synthesizer/aleo-cli" ]
 browser = [ ]
 
 ## Profiles
