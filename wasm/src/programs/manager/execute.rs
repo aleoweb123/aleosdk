@@ -138,7 +138,10 @@ impl ProgramManager {
         fee_verifying_key: Option<VerifyingKey>,
     ) -> Result<Transaction, String> {
         log(&format!("Executing function: {function} on-chain"));
-        let mut fee_microcredits = Self::validate_amount(fee_credits, &fee_record, true)?;
+        let mut fee_microcredits = match &fee_record {
+            Some(fee_record) => Self::validate_amount(fee_credits, fee_record, true)?,
+            None => (fee_credits * 1_000_000.0) as u64,
+        };
 
         let mut new_process;
         let process = get_process!(self, cache, new_process);
@@ -174,8 +177,8 @@ impl ProgramManager {
             // Retrieve the function name.
             let function_name = transition.function_name();
             // Retrieve the finalize cost.
-            let cost = match &program.get_function(function_name).map_err(|e| e.to_string())?.finalize() {
-                Some((_, finalize)) => cost_in_microcredits(finalize).map_err(|e| e.to_string())?,
+            let cost = match program.get_function(function_name).map_err(|e| e.to_string())?.finalize_logic() {
+                Some(finalize) => cost_in_microcredits(finalize).map_err(|e| e.to_string())?,
                 None => continue,
             };
             // Accumulate the finalize cost.
