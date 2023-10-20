@@ -132,7 +132,7 @@ impl ProgramManager {
         program: &str,
         function: &str,
         inputs: Array,
-        fee_credits: f64,
+        priority_fee: f64,
         fee_record: Option<RecordPlaintext>,
         url: &str,
         imports: Option<Object>,
@@ -142,9 +142,9 @@ impl ProgramManager {
         fee_verifying_key: Option<VerifyingKey>,
     ) -> Result<Transaction, String> {
         log(&format!("Executing function: {function} on-chain"));
-        let mut fee_microcredits = match &fee_record {
-            Some(fee_record) => Self::validate_amount(fee_credits, fee_record, true)?,
-            None => (fee_credits * 1_000_000.0) as u64,
+        let priority_fee = match &fee_record {
+            Some(fee_record) => Self::validate_amount(priority_fee, fee_record, true)?,
+            None => (priority_fee * 1_000_000.0) as u64,
         };
 
         let mut process_native = ProcessNative::load_web().map_err(|err| err.to_string())?;
@@ -198,14 +198,15 @@ impl ProgramManager {
                 .checked_add(cost)
                 .ok_or("The finalize cost computation overflowed for an execution".to_string())?;
         }
-        fee_microcredits = fee_microcredits + storage_cost + finalize_cost;
+        let minimum_fee_cost = finalize_cost + storage_cost;
 
-        log(&format!("Executing fee {fee_microcredits} (storage_cost:{storage_cost} finalize_cost:{finalize_cost})"));
+        log(&format!("Executing fee {minimum_fee_cost} (storage_cost:{storage_cost} finalize_cost:{finalize_cost})"));
         let fee = execute_fee!(
             process,
             private_key,
             fee_record,
-            fee_microcredits,
+            minimum_fee_cost,
+            priority_fee,
             url,
             fee_proving_key,
             fee_verifying_key,
