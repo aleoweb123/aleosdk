@@ -141,7 +141,7 @@ impl ProgramManager {
         fee_proving_key: Option<ProvingKey>,
         fee_verifying_key: Option<VerifyingKey>,
     ) -> Result<Transaction, String> {
-        log(&format!("Executing function: {function} on-chain"));
+        log(&format!("Executing function: {program} {function} {priority_fee} on-chain"));
         let priority_fee = match &fee_record {
             Some(fee_record) => Self::validate_amount(priority_fee, fee_record, true)?,
             None => (priority_fee * 1_000_000.0) as u64,
