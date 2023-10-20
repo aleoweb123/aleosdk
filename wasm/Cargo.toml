@@ -30,29 +30,18 @@ features = [ "wasm" ]
 
 [dependencies.snarkvm-ledger-block]
 version = "0.15.4"
-<<<<<<< HEAD
-
-[dependencies.snarkvm-ledger-query]
-version = "0.15.4"
-features = [ "async" ]
-=======
 features = [ "wasm" ]
 
 [dependencies.snarkvm-ledger-query]
 version = "0.15.4"
 features = [ "async", "wasm" ]
->>>>>>> 4c221a0a9662da6bc35932b6ebfbccfc2f76de4c
 
 [dependencies.snarkvm-ledger-store]
 version = "0.15.4"
 
 [dependencies.snarkvm-synthesizer]
 version = "0.15.4"
-<<<<<<< HEAD
-features = [ "async" ]
-=======
 features = [ "async", "wasm" ]
->>>>>>> 4c221a0a9662da6bc35932b6ebfbccfc2f76de4c
 
 [dependencies.snarkvm-wasm]
 version = "0.15.4"

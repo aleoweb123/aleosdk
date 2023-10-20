@@ -158,7 +158,7 @@ impl ProgramManager {
         log(&format!("transfer trace prove_execution locator {locator}"));
         // Prove the execution and fee
         let execution = trace
-            .prove_execution::<CurrentAleo, _>(&locator, &mut StdRng::from_entropy())
+            .prove_execution::<CurrentAleo, _>(&locator, rng)
             .map_err(|e| e.to_string())?;
         let execution_id = execution.to_execution_id().map_err(|e| e.to_string())?;
 

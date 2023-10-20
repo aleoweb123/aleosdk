@@ -131,26 +131,11 @@ import {
     RecordSearchParams,
 } from "./record-provider";
 
-<<<<<<< HEAD
-import { initThreadPool as wasmInitThreadPool } from "@aleohq/wasm";
-
-=======
->>>>>>> 4c221a0a9662da6bc35932b6ebfbccfc2f76de4c
 // @TODO: This function is no longer needed, remove it.
 async function initializeWasm() {
     console.warn("initializeWasm is deprecated, you no longer need to use it");
 }
 
-<<<<<<< HEAD
-/**
- * Initializes a thread pool of Workers. This enables multi-threading, which significantly improves performance.
- */
-async function initThreadPool(threads: number) {
-    await wasmInitThreadPool(new URL("thread.js", import.meta.url), threads);
-}
-
-=======
->>>>>>> 4c221a0a9662da6bc35932b6ebfbccfc2f76de4c
 export { createAleoWorker } from "./managed-worker";
 
 export { ProgramManager } from "./program-manager";
@@ -173,11 +158,7 @@ export {
     initThreadPool,
 } from "@aleohq/wasm";
 
-<<<<<<< HEAD
-export { initializeWasm, initThreadPool };
-=======
 export { initializeWasm };
->>>>>>> 4c221a0a9662da6bc35932b6ebfbccfc2f76de4c
 
 export {
     Account,

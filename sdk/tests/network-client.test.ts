@@ -1,14 +1,10 @@
 import {jest} from '@jest/globals'
 import {Account, Block, AleoNetworkClient, Transaction} from "../src/node";
-<<<<<<< HEAD
-import {beaconPrivateKeyString} from "./data/account-data";
-=======
 import {beaconAddressString, beaconPrivateKeyString} from "./data/account-data";
->>>>>>> 4c221a0a9662da6bc35932b6ebfbccfc2f76de4c
 import {log} from "console";
 jest.retryTimes(3);
 
-describe.skip('NodeConnection', () => {
+describe('NodeConnection', () => {
     let connection: AleoNetworkClient;
 
     beforeEach(() => {
@@ -181,8 +177,6 @@ describe.skip('NodeConnection', () => {
             expect(imports).toEqual(expectedImports);
         }, 60000);
     });
-<<<<<<< HEAD
-=======
     describe('Mappings', () => {
         it('should find program mappings and read mappings', async () => {
             const mappings = await connection.getProgramMappingNames("credits.aleo");
@@ -195,5 +189,4 @@ describe.skip('NodeConnection', () => {
             }
         }, 60000);
     });
->>>>>>> 4c221a0a9662da6bc35932b6ebfbccfc2f76de4c
 });
