@@ -1,15 +1,6 @@
-import {
-    Account,
-    initThreadPool,
-    PrivateKey,
-    ProgramManager,
-} from "@aleohq/sdk";
+import {Account, initThreadPool, PrivateKey, ProgramManager,} from "@aleohq/sdk";
 
-<<<<<<< HEAD
-await initThreadPool(10);
-=======
 await initThreadPool();
->>>>>>> 4c221a0a9662da6bc35932b6ebfbccfc2f76de4c
 
 const hello_hello_program =
     "program hello_hello.aleo;\n" +
@@ -36,16 +27,8 @@ async function localProgramExecution(program, aleoFunction, inputs) {
     return executionResponse.getOutputs();
 }
 
-function getPrivateKey() {
-    return new PrivateKey().to_string();
-}
-
-onmessage = async function (e) {
-    if (e.data === "execute") {
-        const result = await localProgramExecution();
-        postMessage(result);
-    } else if (e.data === "key") {
-        const result = getPrivateKey();
-        postMessage(result);
-    }
-};
+const start = Date.now();
+console.log("Starting execute!");
+const result = await localProgramExecution();
+console.log(result);
+console.log("Execute finished!", Date.now() - start);

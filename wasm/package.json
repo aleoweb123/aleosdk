@@ -1,6 +1,6 @@
 {
   "name": "@aleohq/wasm",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "description": "Wasm build for the SDK",
   "collaborators": [
     "The Aleo Team <hello@aleo.org>"
@@ -34,7 +34,11 @@
   },
   "homepage": "https://github.com/AleoHQ/sdk#readme",
   "scripts": {
+<<<<<<< HEAD
     "build": "rimraf dist && rollup -c rollup.config.js && cpr js/types dist",
+=======
+    "build": "rimraf dist && rollup -c rollup.config.js && cpr js/types dist && rimraf dist/wasm*",
+>>>>>>> 4c221a0a9662da6bc35932b6ebfbccfc2f76de4c
     "prepublish": "yarn build",
     "test": "node test.js"
   },
